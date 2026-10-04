@@ -1,0 +1,15 @@
+{
+  "name": "negro-matapacos-gbc",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Game Boy Color platformer with banked art and a reproducible GBDK build",
+  "scripts": {
+    "art:build": "node tools/build-art.cjs",
+    "game:build": "node tools/build-rom.cjs",
+    "game:test": "node tools/test-game.cjs",
+    "game:play": "powershell -ExecutionPolicy Bypass -File tools/run-game.ps1"
+  },
+  "devDependencies": {
+    "sharp": "0.35.4"
+  }
+}

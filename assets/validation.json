@@ -1,0 +1,486 @@
+{
+  "passed": true,
+  "sprite_frames": 32,
+  "sprite_tiles": 117,
+  "max_sprite_tiles": 128,
+  "checks": [
+    {
+      "name": "alameda",
+      "tiles": 126,
+      "max_tiles": 128,
+      "palettes": 8,
+      "max_palettes": 8,
+      "objects": 22,
+      "max_objects": 40,
+      "objects_per_line": 10,
+      "max_objects_per_line": 10,
+      "pass": true
+    },
+    {
+      "name": "campus",
+      "tiles": 128,
+      "max_tiles": 128,
+      "palettes": 8,
+      "max_palettes": 8,
+      "objects": 18,
+      "max_objects": 40,
+      "objects_per_line": 8,
+      "max_objects_per_line": 10,
+      "pass": true
+    },
+    {
+      "name": "plaza",
+      "tiles": 125,
+      "max_tiles": 128,
+      "palettes": 8,
+      "max_palettes": 8,
+      "objects": 18,
+      "max_objects": 40,
+      "objects_per_line": 8,
+      "max_objects_per_line": 10,
+      "pass": true
+    },
+    {
+      "name": "mapocho",
+      "tiles": 125,
+      "max_tiles": 128,
+      "palettes": 8,
+      "max_palettes": 8,
+      "objects": 18,
+      "max_objects": 40,
+      "objects_per_line": 8,
+      "max_objects_per_line": 10,
+      "pass": true
+    },
+    {
+      "name": "moneda",
+      "tiles": 126,
+      "max_tiles": 128,
+      "palettes": 8,
+      "max_palettes": 8,
+      "objects": 18,
+      "max_objects": 40,
+      "objects_per_line": 8,
+      "max_objects_per_line": 10,
+      "pass": true
+    },
+    {
+      "name": "title",
+      "tiles": 223,
+      "max_tiles": 256,
+      "palettes": 8,
+      "max_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "language_select",
+      "tiles": 91,
+      "max_tiles": 256,
+      "palettes": 8,
+      "max_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "controls",
+      "tiles": 117,
+      "max_tiles": 256,
+      "palettes": 8,
+      "max_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "pause",
+      "tiles": 82,
+      "max_tiles": 256,
+      "palettes": 8,
+      "max_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "game_over",
+      "tiles": 89,
+      "max_tiles": 256,
+      "palettes": 8,
+      "max_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "stage_clear",
+      "tiles": 98,
+      "max_tiles": 256,
+      "palettes": 8,
+      "max_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "ending",
+      "tiles": 131,
+      "max_tiles": 256,
+      "palettes": 8,
+      "max_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "world_map",
+      "tiles": 236,
+      "max_tiles": 256,
+      "palettes": 8,
+      "max_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "world_map_2",
+      "tiles": 240,
+      "max_tiles": 256,
+      "palettes": 8,
+      "max_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "world_map_3",
+      "tiles": 247,
+      "max_tiles": 256,
+      "palettes": 8,
+      "max_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "world_map_4",
+      "tiles": 239,
+      "max_tiles": 256,
+      "palettes": 8,
+      "max_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "world_map_5",
+      "tiles": 246,
+      "max_tiles": 256,
+      "palettes": 8,
+      "max_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "ceremony_rescue",
+      "tiles": 207,
+      "max_tiles": 256,
+      "palettes": 8,
+      "max_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "ceremony_medal",
+      "tiles": 216,
+      "max_tiles": 256,
+      "palettes": 8,
+      "max_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "ceremony_flag",
+      "tiles": 208,
+      "max_tiles": 256,
+      "palettes": 8,
+      "max_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "localization_resources",
+      "languages": [
+        "en",
+        "es"
+      ],
+      "string_ids": 41,
+      "missing_translations": 0,
+      "missing_glyphs": 0,
+      "pass": true
+    },
+    {
+      "name": "language_first_design",
+      "first_screen": "language_select",
+      "start_game_visible_before_confirmation": false,
+      "pass": true
+    },
+    {
+      "name": "chilean_checkpoint_palette",
+      "blue_pixels": 46,
+      "red_pixels": 24,
+      "white_pixels": 31,
+      "opaque_colors": 3,
+      "pass": true
+    },
+    {
+      "name": "sprites_2bpp_roundtrip",
+      "frames": 32,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "alameda_2bpp_roundtrip",
+      "tiles": 126,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "campus_2bpp_roundtrip",
+      "tiles": 128,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "plaza_2bpp_roundtrip",
+      "tiles": 125,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "mapocho_2bpp_roundtrip",
+      "tiles": 125,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "moneda_2bpp_roundtrip",
+      "tiles": 126,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "title_2bpp_roundtrip",
+      "tiles": 223,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "language_select_2bpp_roundtrip",
+      "tiles": 91,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "controls_2bpp_roundtrip",
+      "tiles": 117,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "pause_2bpp_roundtrip",
+      "tiles": 82,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "game_over_2bpp_roundtrip",
+      "tiles": 89,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "stage_clear_2bpp_roundtrip",
+      "tiles": 98,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "ending_2bpp_roundtrip",
+      "tiles": 131,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "world_map_2bpp_roundtrip",
+      "tiles": 236,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "world_map_2_2bpp_roundtrip",
+      "tiles": 240,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "world_map_3_2bpp_roundtrip",
+      "tiles": 247,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "world_map_4_2bpp_roundtrip",
+      "tiles": 239,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "world_map_5_2bpp_roundtrip",
+      "tiles": 246,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "ceremony_rescue_2bpp_roundtrip",
+      "tiles": 207,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "ceremony_medal_2bpp_roundtrip",
+      "tiles": 216,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "ceremony_flag_2bpp_roundtrip",
+      "tiles": 208,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "alameda_2bpp_roundtrip",
+      "tiles": 139,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "alameda_composite_2bpp_roundtrip",
+      "tiles": 137,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "campus_2bpp_roundtrip",
+      "tiles": 179,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "campus_composite_2bpp_roundtrip",
+      "tiles": 178,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "plaza_2bpp_roundtrip",
+      "tiles": 176,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "plaza_composite_2bpp_roundtrip",
+      "tiles": 174,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "mapocho_2bpp_roundtrip",
+      "tiles": 156,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "mapocho_composite_2bpp_roundtrip",
+      "tiles": 156,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "moneda_2bpp_roundtrip",
+      "tiles": 210,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "moneda_composite_2bpp_roundtrip",
+      "tiles": 207,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "presidential_standard_2bpp_roundtrip",
+      "tiles": 12,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "title_blink_2bpp_roundtrip",
+      "tiles": 223,
+      "palettes": 8,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "alameda_mixed_vram_banks",
+      "mismatched_pixels": 0,
+      "background_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "campus_mixed_vram_banks",
+      "mismatched_pixels": 0,
+      "background_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "plaza_mixed_vram_banks",
+      "mismatched_pixels": 0,
+      "background_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "mapocho_mixed_vram_banks",
+      "mismatched_pixels": 0,
+      "background_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "moneda_mixed_vram_banks",
+      "mismatched_pixels": 0,
+      "background_palettes": 8,
+      "pass": true
+    },
+    {
+      "name": "dog_24_optional_rom_roundtrip",
+      "rom_tiles": 144,
+      "resident_tiles_with_streaming": 9,
+      "objects_per_pose": 9,
+      "mismatched_pixels": 0,
+      "pass": true
+    },
+    {
+      "name": "eight_distinct_run_frames",
+      "distinct_frames": 8,
+      "pass": true
+    }
+  ]
+}

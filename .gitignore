@@ -1,0 +1,8 @@
+node_modules/
+.tools/
+build/
+*.gbc
+*.gb
+*.ihx
+*.noi
+*.sym

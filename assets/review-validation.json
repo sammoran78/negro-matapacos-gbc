@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "languages": [
+    "en",
+    "es"
+  ],
+  "checks": [
+    "explicit language gating",
+    "controls before world map",
+    "locked node rejection",
+    "five sequential rescues",
+    "three ending beats",
+    "replay preserves unlocks",
+    "24-pixel option",
+    "left facing",
+    "five depth studies"
+  ],
+  "browser_errors": []
+}

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Negro Matapacos · art review</title>
+  <style>
+    body { margin:32px; background:#18202c; color:#f8e8c0; font:16px system-ui; }
+    h1 { color:#ee493f; }
+    img { image-rendering:pixelated; max-width:100%; object-fit:contain; background:#f8e8c0; }
+    figure { margin:0; background:#24303d; padding:16px; border-radius:8px; }
+    section { display:flex; gap:24px; flex-wrap:wrap; margin:24px 0; }
+    figcaption { margin-top:12px; }
+    button,select { font:inherit; padding:8px; background:#f8e8c0; color:#18202c; border:0; border-radius:4px; cursor:pointer; }
+    canvas { image-rendering:pixelated; background:#f8e8c0; width:160px; height:160px; }
+    #boot { width:480px; height:432px; max-width:100%; }
+    small { color:#9cacc4; }
+  </style>
+</head>
+<body>
+  <h1>NEGRO MATAPACOS</h1>
+  <p>Art first · Game Boy Color · English / Español</p>
+  <section>
+    <figure>
+      <canvas id="boot" width="160" height="144" aria-label="Language-first startup art preview"></canvas>
+      <p><button data-lang="en">English</button> <button data-lang="es">Español</button> <button id="startOption" hidden></button></p>
+      <p id="mapControls" hidden><span id="nodeButtons"></span> <button id="rescue">Simulate stage rescue</button></p>
+      <p id="mapStatus"></p>
+      <figcaption>Language choice → title → controls → Santiago map → stage → rescue → next unlock → palace finale.</figcaption>
+      <p><small>This demonstrates the proposed screens; gameplay is not implemented.</small></p>
+    </figure>
+    <figure>
+      <canvas id="dog" width="24" height="24" style="width:240px;height:240px"></canvas>
+      <p><select id="seq"><option>run</option><option>idle</option><option>bark</option><option>jump</option><option>fall</option><option>hurt</option><option>celebrate</option></select> <button id="flip">Face left</button></p>
+      <p><select id="spriteSize"><option value="16">16 × 16 target · 4 sprites</option><option value="24">24 × 24 alternative · 9 sprites</option></select></p>
+      <img id="dogSheet" src="native/dog.png" width="384" height="384">
+      <figcaption>16 poses · 8-frame run cycle · fuller silhouette and 80 ms run cadence</figcaption>
+      <p><small>The 24 × 24 option requires revised collision/OAM budgets and streaming 9 frame tiles. It is not the current player specification.</small></p>
+    </figure>
+  </section>
+  <section><figure>
+    <canvas id="depth" width="160" height="144" style="width:480px;height:432px"></canvas>
+    <p><select id="depthStage"><option value="alameda">Alameda</option><option value="campus">Campus</option><option value="plaza">Plaza Dignidad</option><option value="mapocho">Río Mapocho</option><option value="moneda">La Moneda</option></select> <label><input type="checkbox" id="depthMotion" checked> Animate scrolling bands</label></p>
+    <figcaption>Depth study: sky 1/8 speed · Andes 1/4 speed · city/playfield full speed. A browser art study; LCD interrupts are not yet implemented.</figcaption>
+  </figure></section>
+  <section><figure><img src="native/title-screen.png" width="320"><figcaption>Title menu after language confirmation</figcaption></figure><figure><img src="native/language_select-screen.png" width="320"><figcaption>English / Español selector</figcaption></figure><figure><img src="native/actors.png" width="320"><figcaption>Officers · students · Chilean checkpoint flag</figcaption></figure><figure><img src="native/alameda-layered-mockup.png" width="320"><figcaption>alameda · layered stage study</figcaption></figure><figure><img src="native/alameda-depth.png" width="320"><figcaption>alameda · scenic depth bands</figcaption></figure><figure><img src="native/alameda-tiles.png" width="320"><figcaption>alameda · playfield tiles</figcaption></figure><figure><img src="native/campus-layered-mockup.png" width="320"><figcaption>campus · layered stage study</figcaption></figure><figure><img src="native/campus-depth.png" width="320"><figcaption>campus · scenic depth bands</figcaption></figure><figure><img src="native/campus-tiles.png" width="320"><figcaption>campus · playfield tiles</figcaption></figure><figure><img src="native/plaza-layered-mockup.png" width="320"><figcaption>plaza · layered stage study</figcaption></figure><figure><img src="native/plaza-depth.png" width="320"><figcaption>plaza · scenic depth bands</figcaption></figure><figure><img src="native/plaza-tiles.png" width="320"><figcaption>plaza · playfield tiles</figcaption></figure><figure><img src="native/mapocho-layered-mockup.png" width="320"><figcaption>mapocho · layered stage study</figcaption></figure><figure><img src="native/mapocho-depth.png" width="320"><figcaption>mapocho · scenic depth bands</figcaption></figure><figure><img src="native/mapocho-tiles.png" width="320"><figcaption>mapocho · playfield tiles</figcaption></figure><figure><img src="native/moneda-layered-mockup.png" width="320"><figcaption>moneda · layered stage study</figcaption></figure><figure><img src="native/moneda-depth.png" width="320"><figcaption>moneda · scenic depth bands</figcaption></figure><figure><img src="native/moneda-tiles.png" width="320"><figcaption>moneda · playfield tiles</figcaption></figure><figure><img src="native/world_map-1-screen.png" width="320"><figcaption>Santiago · first stage unlocked</figcaption></figure><figure><img src="native/world_map-5-screen.png" width="320"><figcaption>Santiago · complete route unlocked</figcaption></figure><figure><img src="native/ceremony-actors.png" width="320"><figcaption>Finale figures · 24-pixel BG composites</figcaption></figure><figure><img src="native/ceremony_rescue-screen.png" width="320"><figcaption>Students run to the president</figcaption></figure><figure><img src="native/ceremony_medal-screen.png" width="320"><figcaption>Medal award</figcaption></figure><figure><img src="native/ceremony_flag-screen.png" width="320"><figcaption>Presidential standard raised · ending</figcaption></figure><figure><img src="native/presidential-standard.png" width="320"><figcaption>Presidential standard · simplified coat of arms</figcaption></figure><figure><img src="native/controls-screen.png" width="320"><figcaption>Controles</figcaption></figure><figure><img src="native/pause-screen.png" width="320"><figcaption>Pausa</figcaption></figure><figure><img src="native/game_over-screen.png" width="320"><figcaption>Fin del juego</figcaption></figure><figure><img src="native/stage_clear-screen.png" width="320"><figcaption>Rescate</figcaption></figure></section>
+  <p><small>World artwork lettering stays Spanish. Interface and dialogue text use the chosen language. Native screenshot examples show Spanish UI. See manifest.json and validation.json for tile, palette and OAM budgets.</small></p>
+  <script>
+    const font={"0":["01110","10001","10011","10101","11001","10001","01110"],"1":["00100","01100","00100","00100","00100","00100","01110"],"2":["01110","10001","00001","00010","00100","01000","11111"],"3":["11110","00001","00001","01110","00001","00001","11110"],"4":["00010","00110","01010","10010","11111","00010","00010"],"5":["11111","10000","10000","11110","00001","00001","11110"],"6":["01110","10000","10000","11110","10001","10001","01110"],"7":["11111","00001","00010","00100","01000","01000","01000"],"8":["01110","10001","10001","01110","10001","10001","01110"],"9":["01110","10001","10001","01111","00001","00001","01110"],"A":["01110","10001","10001","11111","10001","10001","10001"],"B":["11110","10001","10001","11110","10001","10001","11110"],"C":["01111","10000","10000","10000","10000","10000","01111"],"D":["11110","10001","10001","10001","10001","10001","11110"],"E":["11111","10000","10000","11110","10000","10000","11111"],"F":["11111","10000","10000","11110","10000","10000","10000"],"G":["01111","10000","10000","10111","10001","10001","01111"],"H":["10001","10001","10001","11111","10001","10001","10001"],"I":["11111","00100","00100","00100","00100","00100","11111"],"J":["00111","00010","00010","00010","10010","10010","01100"],"K":["10001","10010","10100","11000","10100","10010","10001"],"L":["10000","10000","10000","10000","10000","10000","11111"],"M":["10001","11011","10101","10101","10001","10001","10001"],"N":["10001","11001","10101","10011","10001","10001","10001"],"O":["01110","10001","10001","10001","10001","10001","01110"],"P":["11110","10001","10001","11110","10000","10000","10000"],"Q":["01110","10001","10001","10001","10101","10010","01101"],"R":["11110","10001","10001","11110","10100","10010","10001"],"S":["01111","10000","10000","01110","00001","00001","11110"],"T":["11111","00100","00100","00100","00100","00100","00100"],"U":["10001","10001","10001","10001","10001","10001","01110"],"V":["10001","10001","10001","10001","10001","01010","00100"],"W":["10001","10001","10001","10101","10101","10101","01010"],"X":["10001","10001","01010","00100","01010","10001","10001"],"Y":["10001","10001","01010","00100","00100","00100","00100"],"Z":["11111","00001","00010","00100","01000","10000","11111"],"!":["00100","00100","00100","00100","00100","00000","00100"],":":["00000","00100","00100","00000","00100","00100","00000"],"-":["00000","00000","00000","11111","00000","00000","00000"],"/":["00001","00001","00010","00100","01000","10000","10000"],">":["10000","01000","00100","00010","00100","01000","10000"]," ":["00000","00000","00000","00000","00000","00000","00000"],"Ñ":["01010","10001","11001","10101","10011","10001","10001"],"Á":["00100","01110","10001","11111","10001","10001","10001"],"É":["00100","11111","10000","11110","10000","10000","11111"],"Í":["00100","11111","00100","00100","00100","00100","11111"],"Ó":["00100","01110","10001","10001","10001","10001","01110"],"Ú":["00100","10001","10001","10001","10001","10001","01110"],"Ü":["01010","10001","10001","10001","10001","10001","01110"],"¡":["00100","00000","00100","00100","00100","00100","00100"],"?":["01110","10001","00001","00010","00100","00000","00100"],"¿":["00100","00000","00100","01000","10000","10001","01110"],",":["00000","00000","00000","00000","00000","00100","01000"],".":["00000","00000","00000","00000","00000","00000","00100"]}, resources={"version":1,"languages":{"en":"English","es":"Español"},"boot_requires_explicit_language_selection":true,"world_artwork_language":"es","preview_language":"es","strings":{"world_map":{"en":"SANTIAGO ROUTE","es":"RUTA POR SANTIAGO"},"choose_level":{"en":"A - ENTER","es":"A - ENTRAR"},"locked":{"en":"LOCKED","es":"BLOQUEADO"},"level_unlocked":{"en":"NEXT STAGE OPEN!","es":"¡NUEVA ETAPA ABIERTA!"},"stage_alameda":{"en":"ALAMEDA","es":"ALAMEDA"},"stage_campus":{"en":"CAMPUS","es":"CAMPUS"},"stage_plaza":{"en":"DIGNITY SQUARE","es":"PLAZA DIGNIDAD"},"stage_mapocho":{"en":"MAPOCHO RIVER","es":"RÍO MAPOCHO"},"stage_moneda":{"en":"LA MONEDA PALACE","es":"PALACIO LA MONEDA"},"ending_rescue":{"en":"EVERYONE IS SAFE!","es":"¡TODOS A SALVO!"},"ending_medal":{"en":"A MEDAL FOR OUR HERO","es":"UNA MEDALLA AL HÉROE"},"ending_flag":{"en":"THANK YOU, MATAPACOS!","es":"¡GRACIAS, MATAPACOS!"},"ending_complete":{"en":"THE END","es":"FIN"},"president_thanks":{"en":"YOU PROTECTED THEM","es":"LOS HAS PROTEGIDO"},"start_game":{"en":"START GAME","es":"INICIAR JUEGO"},"language":{"en":"LANGUAGE","es":"IDIOMA"},"continue":{"en":"PRESS START","es":"PULSA START"},"controls_title":{"en":"HOW TO PLAY","es":"CÓMO JUGAR"},"controls_move":{"en":"LEFT / RIGHT - MOVE","es":"IZQ / DER - MOVER"},"controls_jump":{"en":"A - JUMP","es":"A - SALTAR"},"controls_bark":{"en":"B - BARK","es":"B - LADRAR"},"controls_run":{"en":"DOUBLE TAP - RUN","es":"DOBLE TOQUE - CORRER"},"controls_pause":{"en":"START - PAUSE","es":"START - PAUSA"},"paused":{"en":"PAUSED","es":"PAUSA"},"pause_message":{"en":"STUDENTS NEED YOU","es":"LOS ESTUDIANTES TE ESPERAN"},"game_over":{"en":"GAME OVER","es":"FIN DEL JUEGO"},"try_again":{"en":"TRY AGAIN","es":"INTENTA DE NUEVO"},"students_safe":{"en":"STUDENTS SAFE!","es":"¡ESTUDIANTES A SALVO!"},"alameda_clear":{"en":"ALAMEDA CLEAR","es":"ALAMEDA COMPLETADA"},"thank_you":{"en":"THANK YOU","es":"¡GRACIAS!"},"ending_message":{"en":"THE STREETS REMEMBER","es":"LAS CALLES TE RECUERDAN"},"hero_name":{"en":"NEGRO MATAPACOS","es":"NEGRO MATAPACOS"},"hud_lives_short":{"en":"L","es":"V"},"hud_lives":{"en":"LIVES","es":"VIDAS"},"hud_empanadas":{"en":"EMPANADAS","es":"EMPANADAS"},"checkpoint":{"en":"CHECKPOINT","es":"PUNTO DE CONTROL"},"rescue_prompt":{"en":"BARK AT THE BARRICADE!","es":"¡LADRA A LA BARRICADA!"},"student_help":{"en":"HELP US!","es":"¡AYÚDANOS!"},"student_follow":{"en":"THIS WAY!","es":"¡POR AQUÍ!"},"student_thanks":{"en":"THANK YOU, MATAPACOS!","es":"¡GRACIAS, MATAPACOS!"},"hazard_warning":{"en":"LOOK OUT!","es":"¡CUIDADO!"}}}, sequences={"idle":[0,1],"run":[2,12,3,13,4,14,5,15],"jump":[6],"fall":[7],"bark":[8,9],"hurt":[10],"celebrate":[11]}, design={"world_map":{"stage_order":["alameda","campus","plaza","mapocho","moneda"],"nodes":[{"id":"alameda","x":44,"y":112,"text_id":"stage_alameda"},{"id":"campus","x":24,"y":76,"text_id":"stage_campus"},{"id":"plaza","x":124,"y":84,"text_id":"stage_plaza"},{"id":"mapocho","x":104,"y":48,"text_id":"stage_mapocho"},{"id":"moneda","x":72,"y":80,"text_id":"stage_moneda"}],"segments":[[[44,112],[24,112],[24,76]],[[24,76],[44,76],[44,120],[124,120],[124,84]],[[124,84],[136,84],[136,48],[104,48]],[[104,48],[88,48],[88,80],[72,80]]],"initial_unlocked":1,"unlock_rule":"Clearing stage i unlocks only i+1; retries and replays never relock nodes.","geography":"Schematic Santiago: campus west, river north of Alameda, plaza east, palace central south of river.","revisits":true,"progress_persistence":"session only","current_node_marker":{"sprite_frame":"celebrate","objects":4,"anchor":"node center above marker"}},"animation_timing_ms":{"run":80,"idle":240,"bark":140,"jump":160,"fall":160,"hurt":160,"celebrate":240},"backdrops":{"alameda":{"bands":[{"name":"sky","y":0,"height":32,"scroll_divisor":8},{"name":"andes","y":32,"height":32,"scroll_divisor":4},{"name":"city","y":64,"height":32,"scroll_divisor":1}]},"campus":{"bands":[{"name":"sky","y":0,"height":32,"scroll_divisor":8},{"name":"andes","y":32,"height":32,"scroll_divisor":4},{"name":"city","y":64,"height":32,"scroll_divisor":1}]},"plaza":{"bands":[{"name":"sky","y":0,"height":32,"scroll_divisor":8},{"name":"andes","y":32,"height":32,"scroll_divisor":4},{"name":"city","y":64,"height":32,"scroll_divisor":1}]},"mapocho":{"bands":[{"name":"sky","y":0,"height":32,"scroll_divisor":8},{"name":"andes","y":32,"height":32,"scroll_divisor":4},{"name":"city","y":64,"height":32,"scroll_divisor":1}]},"moneda":{"bands":[{"name":"sky","y":0,"height":32,"scroll_divisor":8},{"name":"andes","y":32,"height":32,"scroll_divisor":4},{"name":"city","y":64,"height":32,"scroll_divisor":1}]}}};
+    const ink='#192129', cream='#f7e6bd';
+    const boot=document.getElementById('boot'), bc=boot.getContext('2d');
+    let locale=null, screen='language',unlocked=1,selected=0,finale=0;
+    const pictures={};
+    const files={language:'language_select-screen.png',title:'title-screen.png',controls:'controls-screen.png'};
+    for(let i=1;i<=5;i++)files['map'+i]='world_map-'+i+'-screen.png';
+    design.world_map.stage_order.forEach(name=>files[name]=name+'-layered-mockup.png');
+    ['rescue','medal','flag'].forEach((name,i)=>files['finale'+i]='ceremony_'+name+'-screen.png');
+    for(const [name,file] of Object.entries(files)) {
+      const img=new Image(); pictures[name]=img; img.onload=renderBoot; img.src='native/'+file;
+    }
+    function label(id) { return resources.strings[id][locale]; }
+    function pixelText(str,y,color,scale=1) {
+      let x=Math.floor((160-(str.length*6-1)*scale)/2); bc.fillStyle=color;
+      for(const ch of str) {
+        font[ch].forEach((row,yy)=>{for(let xx=0;xx<5;xx++)if(row[xx]==='1')bc.fillRect(x+xx*scale,y+yy*scale,scale,scale);}); x+=6*scale;
+      }
+    }
+    function renderBoot() {
+      const image=pictures[screen==='map'?'map'+unlocked:screen==='stage'?design.world_map.stage_order[selected]:screen==='finale'?'finale'+finale:screen]; if(!image||!image.complete||!image.naturalWidth)return;
+      bc.imageSmoothingEnabled=false; bc.clearRect(0,0,160,144); bc.drawImage(image,0,0);
+      if(!locale)return;
+      bc.fillStyle=ink; bc.fillRect(0,128,160,16);
+      if(screen==='title') pixelText(label('start_game'),132,cream);
+      if(screen==='controls') {
+        bc.fillStyle=cream; bc.fillRect(0,4,160,98);
+        const ids=['controls_title','controls_move','controls_jump','controls_bark','controls_run','controls_pause'];
+        ids.forEach((id,i)=>pixelText(label(id),i===0?12:32+(i-1)*14,ink));
+        pixelText(label('continue'),132,cream);
+      }
+      if(screen==='map') {
+        bc.fillStyle=ink;bc.fillRect(0,0,160,16);pixelText(label('world_map'),4,cream);
+        pixelText(label('stage_'+design.world_map.stage_order[selected]),132,cream);
+        const node=design.world_map.nodes[selected];
+        if(im.complete&&im.naturalWidth)bc.drawImage(im,48,32,16,16,node.x-8,node.y-22,16,16);
+      }
+      if(screen==='stage') {
+        bc.fillStyle=ink;bc.fillRect(0,128,160,16);
+        pixelText('E 07/50 '+label('hud_lives_short')+' 03',132,cream);
+      }
+      if(screen==='finale') {
+        bc.fillStyle=ink;bc.fillRect(0,0,160,16);
+        pixelText(label(['ending_rescue','ending_medal','ending_flag'][finale]),4,cream);
+        pixelText(label(finale===2?'ending_complete':'president_thanks'),132,cream);
+      }
+    }
+    function updateActions(){
+      const start=document.getElementById('startOption');start.hidden=!locale;
+      start.textContent=screen==='title'?label('start_game'):screen==='map'?label('choose_level'):label('continue');
+      document.getElementById('mapControls').hidden=!['map','stage','finale'].includes(screen);
+      document.querySelectorAll('[data-node]').forEach(button=>{button.textContent=label('stage_'+design.world_map.stage_order[+button.dataset.node])+(+button.dataset.node>=unlocked?' 🔒':'');});
+      document.getElementById('rescue').hidden=screen!=='stage';renderBoot();
+    }
+    design.world_map.nodes.forEach((node,i)=>{
+      const b=document.createElement('button');b.dataset.node=i;b.textContent=String(i+1);
+      b.onclick=()=>{if(i>=unlocked){document.getElementById('mapStatus').textContent=label('locked');return;}selected=i;screen='map';document.getElementById('mapStatus').textContent='';updateActions();};
+      document.getElementById('nodeButtons').append(b);
+    });
+    document.querySelectorAll('[data-lang]').forEach(button=>button.onclick=()=>{
+      locale=button.dataset.lang; screen='title';
+      updateActions();
+    });
+    document.getElementById('startOption').onclick=()=>{
+      if(!locale)return;
+      if(screen==='title')screen='controls';
+      else if(screen==='controls')screen='map';
+      else if(screen==='map')screen='stage';
+      else if(screen==='stage')screen='map';
+      else if(screen==='finale'){if(finale<2)finale++;else screen='map';}
+      updateActions();
+    };
+    document.getElementById('rescue').onclick=()=>{
+      if(screen!=='stage')return;
+      if(selected===4){finale=0;screen='finale';}
+      else{unlocked=Math.max(unlocked,selected+2);selected=Math.min(selected+1,4);screen='map';document.getElementById('mapStatus').textContent=label('level_unlocked');}
+      updateActions();
+    };
+    const im=new Image(); im.src='native/dog.png';
+    const detailed=new Image();detailed.src='native/dog-detail-24.png';
+    const cv=document.getElementById('dog'),ctx=cv.getContext('2d'),seq=document.getElementById('seq');
+    let left=false,t=0,lastFrame=0,size=16,sequenceName='run';
+    document.getElementById('spriteSize').onchange=e=>{size=+e.target.value;document.getElementById('dogSheet').src=size===16?im.src:detailed.src;};
+    document.getElementById('flip').onclick=e=>{left=!left;e.target.textContent=left?'Face right':'Face left';};
+    function animate(now){
+      requestAnimationFrame(animate);const image=size===16?im:detailed;if(!image.complete||!image.naturalWidth)return;
+      if(sequenceName!==seq.value){sequenceName=seq.value;t=0;lastFrame=now;}
+      if(now-lastFrame>=design.animation_timing_ms[seq.value]){t++;lastFrame=now;}
+      const s=sequences[seq.value],f=s[t%s.length];ctx.imageSmoothingEnabled=false;
+      ctx.clearRect(0,0,24,24);ctx.save();if(left){ctx.translate(24,0);ctx.scale(-1,1);}
+      ctx.drawImage(image,(f%4)*size,Math.floor(f/4)*size,size,size,(24-size)/2,24-size,size,size);ctx.restore();
+    }
+    requestAnimationFrame(animate);
+    const dc=document.getElementById('depth').getContext('2d'),depthPictures={};
+    for(const name of design.world_map.stage_order){
+      depthPictures[name]={};for(const [kind,file] of Object.entries({backdrop:name+'-depth.png',scene:name+'-background.png'})){
+        const img=new Image();img.src='native/'+file;depthPictures[name][kind]=img;
+      }
+    }
+    let scroll=0;
+    function depthAnimation(){
+      requestAnimationFrame(depthAnimation);const name=document.getElementById('depthStage').value,p=depthPictures[name];
+      if(!p.backdrop.complete||!p.backdrop.naturalWidth||!p.scene.complete||!p.scene.naturalWidth)return;
+      if(document.getElementById('depthMotion').checked)scroll+=.3;
+      dc.imageSmoothingEnabled=false;
+      for(const band of design.backdrops[name].bands){
+        const offset=Math.floor(scroll/band.scroll_divisor)%160;
+        for(const x of [-offset,160-offset])dc.drawImage(p.backdrop,0,band.y,160,band.height,x,band.y,160,band.height);
+      }
+      const frontOffset=Math.floor(scroll)%160;
+      for(const x of [-frontOffset,160-frontOffset])dc.drawImage(p.scene,0,96,160,32,x,96,160,32);
+      dc.drawImage(p.scene,0,128,160,16,0,128,160,16);
+      const f=sequences.run[Math.floor(scroll/2)%8];
+      if(im.complete&&im.naturalWidth)dc.drawImage(im,f%4*16,Math.floor(f/4)*16,16,16,34,96,16,16);
+    }
+    requestAnimationFrame(depthAnimation);
+  </script>
+</body>
+</html>
