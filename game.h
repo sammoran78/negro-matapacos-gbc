@@ -12,5 +12,6 @@ void screen_load(uint8_t screen) NONBANKED;
 void fetch_text(uint8_t id) NONBANKED;
 void map_marker(uint8_t x,uint8_t y) NONBANKED;
 void ui_show(uint8_t new_state) BANKED;
+void format_dialog(uint8_t id,uint8_t *tiles) BANKED;
 uint8_t ui_update(void) BANKED;
 #endif

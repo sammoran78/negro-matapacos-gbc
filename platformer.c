@@ -60,6 +60,7 @@ static uint8_t streamed;
 static int16_t last_camera_tile, bus_x, previous_bus_x;
 static const StageAsset *stage;
 static const uint8_t run_frames[8]={2,12,3,13,4,14,5,15};
+static const uint16_t dialog_palette[4]={RGB(31,29,24),RGB(3,4,8),RGB(28,10,2),RGB(31,23,3)};
 static const uint16_t coin_bits[16]={1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768};
 
 /* All interrupt code stays in fixed ROM. Switch during the preceding HBlank,
@@ -337,7 +338,7 @@ static void scroll_camera(void){
  commit_scroll();
 }
 static void hud(void){
- uint8_t i,row=0,col=0;
+ uint8_t row;
  if(!hud_dirty && !hud_pending)return;
  if(hud_dirty){hud_dirty=0;
   // Total is monotonic; the separate modulo-50 counter still awards lives.
@@ -345,8 +346,7 @@ static void hud(void){
   if(!message_timer){pending_dialog=0;hud_pending=0;hud_mode=0;return;}
   if(hud_mode==message_id+1u)return;
   pending_dialog=0;
-  for(i=0;i<40u;++i)hud_tiles[i]=FONT_BASE;
-  fetch_text(message_id);for(i=0;text_buffer[i] && i<38u;++i){if(col==19u){row=1;col=0;}hud_tiles[row*20u+col++]=font_lut[text_buffer[i]];}
+  format_dialog(message_id,hud_tiles);
   hud_mode=message_id+1u;hud_pending=2;
  }
  // Only transient messages use the window, clipped to lines 24..39 by LYC.
@@ -433,6 +433,7 @@ static void load_stage(uint8_t restart){
  VBK_REG=0;set_bkg_data(0,stage->tile_count,stage->tiles);
  VBK_REG=1;set_bkg_data(0,stage->depth_count,stage->depth_tiles);VBK_REG=0;
  set_bkg_palette(0,8,stage->palettes);
+ set_bkg_palette(7,1,dialog_palette);
  if(restart)spawn();fill_camera();SCY_REG=0;SCX_REG=pending_far;
  for(i=0;i<40u;++i)hide_sprite(i);
  move_win(7,24);hud_dirty=1;hud_mode=255;hud_pending=0;

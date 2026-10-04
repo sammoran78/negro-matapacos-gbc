@@ -26,6 +26,17 @@ static void paragraph(uint8_t row,uint8_t id){
  }
 }
 static void blank(uint8_t from,uint8_t to){uint8_t y;for(y=from;y<=to;++y)ui_line(y,(const uint8_t *)"");}
+/* Prepare a centered two-line window popup without touching scrolling BG RAM. */
+void format_dialog(uint8_t id,uint8_t *tiles) BANKED {
+ uint8_t i,row,pos=0,n,split,start;fetch_text(id);
+ for(i=0;i<40u;++i)tiles[i]=128u;
+ for(row=0;row<2u && text_buffer[pos];++row){
+  n=0;while(n<20u && text_buffer[pos+n])++n;
+  if(text_buffer[pos+n]){split=n;while(split && text_buffer[pos+split]!=' ')--split;if(split)n=split;}
+  start=(20u-n)>>1;for(i=0;i<n;++i)tiles[row*20u+start+i]=font_lut[text_buffer[pos+i]];
+  pos+=n;if(text_buffer[pos]==' ')++pos;
+ }
+}
 static void language_options(void){
  ui_line(3,(const uint8_t *)"LANGUAGE / IDIOMA");
  ui_line(7,(const uint8_t *)(language?"  ENGLISH":" > ENGLISH"));
