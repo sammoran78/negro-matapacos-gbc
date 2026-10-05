@@ -46,6 +46,7 @@
     "student_help": { "en": "HELP US!", "es": "¡AYÚDANOS!" },
     "student_follow": { "en": "THIS WAY!", "es": "¡POR AQUÍ!" },
     "student_thanks": { "en": "THANK YOU, MATAPACOS!", "es": "¡GRACIAS, MATAPACOS!" },
-    "hazard_warning": { "en": "LOOK OUT!", "es": "¡CUIDADO!" }
+    "hazard_warning": { "en": "LOOK OUT!", "es": "¡CUIDADO!" },
+    "barrier_hit": { "en": "BARK AGAIN!", "es": "¡LADRA OTRA VEZ!" }
   }
 }

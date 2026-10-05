@@ -37,6 +37,57 @@ void format_dialog(uint8_t id,uint8_t *tiles) BANKED {
   pos+=n;if(text_buffer[pos]==' ')++pos;
  }
 }
+/* Pack active HUD slots first, leaving the full remainder for world actors. */
+uint8_t draw_corner_hud(uint8_t empanada_tile) BANKED {
+ uint8_t i,x=16,count=1;OAM_item_t *item;
+ item=&shadow_OAM[0];item->x=12;item->y=22;item->tile=empanada_tile;item->prop=4;
+ for(i=0;i<3u;++i){
+  if(i==2u || hud_digits[0] || (i==1u && hud_digits[1])){
+   item=&shadow_OAM[count++];item->x=x+8u;item->y=22;item->tile=117u+hud_digits[i];item->prop=5;x+=8u;
+  }
+ }
+ for(i=0;i<3u;++i){item=&shadow_OAM[count++];item->x=132u+i*12u;item->y=22;item->tile=182u+(lives<=i);item->prop=4;}
+ if(lives>3u){
+  item=&shadow_OAM[count++];item->x=112;item->y=22;item->tile=127;item->prop=5;
+  item=&shadow_OAM[count++];item->x=120;item->y=22;item->tile=117u+lives-3u;item->prop=5;
+ }
+ return count;
+}
+/* Bank-1 OBJ patterns are independent of the bank-1 signed BG library. */
+void render_gate(int16_t x,uint8_t strength,uint8_t flash) BANKED {
+ static const uint8_t gate_y[13]={0,8,24,32,40,48,48,56,56,64,64,72,72};
+ static const uint8_t gate_x[13]={0,0,0,0,0,0,8,0,8,0,8,0,8};
+ static const uint8_t gate_tile[13]={0,0,0,0,0,1,2,1,2,7,8,1,2};
+ uint8_t i,y,band,left,tile,prop;OAM_item_t *item;
+ // This route's gate remains at x >= 80 once visible (camera max 864).
+ // Its rightmost piece can sit just offscreen without wrapping OAM x.
+ if(x<0 || x>=160 || oam_next>25u)return;
+ left=(uint8_t)x+8u;item=&shadow_OAM[oam_next];
+ for(i=0;i<13u;++i){
+  y=gate_y[i];band=y>>3;if(scanlines[band]>=10u)continue;
+  if(++scanlines[band]>max_scanline_objects)max_scanline_objects=scanlines[band];
+  item->x=left+gate_x[i];item->y=y+16;item->tile=gate_tile[i];item->prop=15;++item;++oam_next;
+ }
+ if(scanlines[2]>8u)return;
+ scanlines[2]+=2u;if(scanlines[2]>max_scanline_objects)max_scanline_objects=scanlines[2];
+ tile=9u+(3u-strength)*2u;prop=8u+(flash?5u:7u);
+ item->x=left;item->y=32;item->tile=tile;item->prop=prop;++item;
+ item->x=left+8u;item->y=32;item->tile=tile+1u;item->prop=prop;oam_next+=2u;
+}
+void reset_officers(void) BANKED {
+ uint8_t i;static const uint16_t starts[5]={184,360,536,704,888};
+ for(i=0;i<ENEMY_COUNT;++i){
+  Officer *o=&officers[i];o->type=current_stage==1u && i==2u;
+  o->x=o->home=o->type?512:starts[i];o->y=96;o->stunned=0;o->left=o->type?1u:i&1u;
+  officer_health[i]=defeated_flags[current_stage]&(1u<<i)?0u:2u;officer_hit_ticks[i]=0;
+  reward_active[i]=!officer_health[i] && !(reward_collected_flags[current_stage]&(1u<<i));
+  reward_x[i]=o->home+4;reward_y[i]=104*16;reward_vy[i]=reward_delay[i]=0;
+ }
+}
+void run_student(int16_t x,uint8_t color,uint8_t frame) BANKED {
+ uint8_t q,base=184u+color*8u+frame*4u;
+ for(q=0;q<4u;++q)object(x+(q&1u)*8,96+(q>>1)*8,base+q,2u+color);
+}
 static void language_options(void){
  ui_line(3,(const uint8_t *)"LANGUAGE / IDIOMA");
  ui_line(7,(const uint8_t *)(language?"  ENGLISH":" > ENGLISH"));
@@ -49,6 +100,9 @@ static void world_labels(void){
  // A dedicated map marker has no overlap with gameplay actors.
  map_marker(node_x[selected],node_y[selected]);
  SHOW_SPRITES;
+}
+void map_marker(uint8_t x,uint8_t y) BANKED {
+ uint8_t q;for(q=0;q<4u;++q){set_sprite_tile(q,sprite_frames[44u+q]);set_sprite_prop(q,0);move_sprite(q,x+(q&1u)*8u,y+(q>>1)*8u);}
 }
 void ui_show(uint8_t new_state) BANKED {
  switch(new_state){

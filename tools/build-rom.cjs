@@ -4,7 +4,7 @@ const candidates=[process.env.GBDK_HOME,...fs.readdirSync(root,{withFileTypes:tr
 let home=candidates.find(p=>fs.existsSync(path.join(p,'bin/lcc.exe')));
 if(!home){console.error('GBDK not found. Set GBDK_HOME or run tools/setup-gbdk.ps1.');process.exit(1);}
 const lcc=path.join(home,'bin/lcc.exe'),build=path.join(root,'build');fs.mkdirSync(build,{recursive:true});
-function run(args){const r=cp.spawnSync(lcc,args,{cwd:root,encoding:'utf8'});if(r.stdout)process.stdout.write(r.stdout);if(r.stderr)process.stderr.write(r.stderr);if(r.status!==0)process.exit(r.status||1);}
+function run(args){const r=cp.spawnSync(lcc,args,{cwd:root,encoding:'utf8'});if(r.stdout)process.stdout.write(r.stdout);if(r.stderr)process.stderr.write(r.stderr);if(r.status!==0 || /Possible overflow|Multiple write of/i.test((r.stdout||'')+(r.stderr||'')))process.exit(r.status||1);}
 const assets=cp.spawnSync(process.execPath,[path.join(root,'tools/build-game-assets.cjs')],{cwd:root,stdio:'inherit'});if(assets.status)process.exit(assets.status);
 const files=['platformer.c','ui.c',...fs.readdirSync(path.join(root,'generated')).filter(n=>n.endsWith('.c')).map(n=>'generated/'+n)];
 const objects=[];

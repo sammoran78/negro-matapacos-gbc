@@ -98,6 +98,7 @@ extern const uint8_t text_0_38[];
 extern const uint8_t text_0_39[];
 extern const uint8_t text_0_40[];
 extern const uint8_t text_0_41[];
+extern const uint8_t text_0_42[];
 extern const uint8_t text_1_0[];
 extern const uint8_t text_1_1[];
 extern const uint8_t text_1_2[];
@@ -140,7 +141,8 @@ extern const uint8_t text_1_38[];
 extern const uint8_t text_1_39[];
 extern const uint8_t text_1_40[];
 extern const uint8_t text_1_41[];
-const uint8_t * const game_text[2][42] = {
- {text_0_0,text_0_1,text_0_2,text_0_3,text_0_4,text_0_5,text_0_6,text_0_7,text_0_8,text_0_9,text_0_10,text_0_11,text_0_12,text_0_13,text_0_14,text_0_15,text_0_16,text_0_17,text_0_18,text_0_19,text_0_20,text_0_21,text_0_22,text_0_23,text_0_24,text_0_25,text_0_26,text_0_27,text_0_28,text_0_29,text_0_30,text_0_31,text_0_32,text_0_33,text_0_34,text_0_35,text_0_36,text_0_37,text_0_38,text_0_39,text_0_40,text_0_41},
- {text_1_0,text_1_1,text_1_2,text_1_3,text_1_4,text_1_5,text_1_6,text_1_7,text_1_8,text_1_9,text_1_10,text_1_11,text_1_12,text_1_13,text_1_14,text_1_15,text_1_16,text_1_17,text_1_18,text_1_19,text_1_20,text_1_21,text_1_22,text_1_23,text_1_24,text_1_25,text_1_26,text_1_27,text_1_28,text_1_29,text_1_30,text_1_31,text_1_32,text_1_33,text_1_34,text_1_35,text_1_36,text_1_37,text_1_38,text_1_39,text_1_40,text_1_41}
+extern const uint8_t text_1_42[];
+const uint8_t * const game_text[2][43] = {
+ {text_0_0,text_0_1,text_0_2,text_0_3,text_0_4,text_0_5,text_0_6,text_0_7,text_0_8,text_0_9,text_0_10,text_0_11,text_0_12,text_0_13,text_0_14,text_0_15,text_0_16,text_0_17,text_0_18,text_0_19,text_0_20,text_0_21,text_0_22,text_0_23,text_0_24,text_0_25,text_0_26,text_0_27,text_0_28,text_0_29,text_0_30,text_0_31,text_0_32,text_0_33,text_0_34,text_0_35,text_0_36,text_0_37,text_0_38,text_0_39,text_0_40,text_0_41,text_0_42},
+ {text_1_0,text_1_1,text_1_2,text_1_3,text_1_4,text_1_5,text_1_6,text_1_7,text_1_8,text_1_9,text_1_10,text_1_11,text_1_12,text_1_13,text_1_14,text_1_15,text_1_16,text_1_17,text_1_18,text_1_19,text_1_20,text_1_21,text_1_22,text_1_23,text_1_24,text_1_25,text_1_26,text_1_27,text_1_28,text_1_29,text_1_30,text_1_31,text_1_32,text_1_33,text_1_34,text_1_35,text_1_36,text_1_37,text_1_38,text_1_39,text_1_40,text_1_41,text_1_42}
 };

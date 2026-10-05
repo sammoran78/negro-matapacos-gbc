@@ -18,7 +18,7 @@
 #define HUD_DIGIT_BASE 117u
 #define HUD_STAR_BASE 182u
 #define RUN_TILE_BASE 184u
-#define BARRIER_TILE_BASE 208u
+#define BARRIER_TILE_BASE 216u
 #define BUS_TILE_BASE 224u
 #define BARK_RANGE 24
 #define CHECKPOINT_X 448
@@ -29,14 +29,14 @@
 #define COYOTE_TICKS 5u
 #define BUFFER_TICKS 5u
 #define STOMP_SPEED (-56)
-#define RESCUE_BARK_RANGE 40
-typedef struct { int16_t x, home; uint8_t y, stunned, left, type; } Officer;
+#define RESCUE_BARK_RANGE 48
 uint8_t state, language, selected, unlocked, lives, empanadas, completed;
 uint8_t buttons, pressed, font_lut[256], text_buffer[64], ui_timer, ending_beat;
 /* Global symbols are intentionally available to the emulator regression suite. */
 int16_t player_x, player_y, player_vx, player_vy, camera_x;
 uint8_t grounded, facing_left, sprinting, coyote, jump_buffer, bark_ticks, bark_cooldown;
 uint8_t invulnerable, checkpoint_flags, barrier_open, rescue_ticks, death_ticks;
+uint8_t barrier_strength,barrier_hit_ticks;
 uint16_t coin_flags[5], total_empanadas, simulation_frame;
 uint8_t current_stage, dog_frame, max_scanline_objects, last_oam_count;
 uint8_t update_phase;
@@ -52,9 +52,12 @@ static volatile uint8_t pending_far,pending_city,pending_foreground;
 static volatile uint8_t pending_dialog;
 static int16_t previous_player_bottom,last_far_tile,last_city_tile;
 static uint8_t previous_buttons, clock_tick, tap_timer, tap_direction, message_timer, message_id;
-static uint8_t sprite_frames[128], sprite_palettes[32], icon_tiles[3], oam_next, scanlines[18];
+uint8_t oam_next,scanlines[18];
+uint8_t sprite_frames[128];
+static uint8_t sprite_palettes[32], icon_tiles[3];
 static uint8_t column_tiles[18], column_attributes[18], hud_tiles[40], hud_attributes[40];
 static uint8_t hud_dirty, hud_mode, hud_pending, ending_timer, ending_row, barrier_redraw, hazard_tick;
+static uint8_t hud_lives_cache,hud_object_count;
 static uint8_t coin_cursor, render_coin_cursor;
 static uint8_t streamed;
 static int16_t last_camera_tile, bus_x, previous_bus_x;
@@ -94,9 +97,6 @@ void fetch_text(uint8_t id) NONBANKED {
  while(src[i] && i<63u){text_buffer[i]=src[i];++i;}text_buffer[i]=0;
  SWITCH_ROM(saved);
 }
-void map_marker(uint8_t x,uint8_t y) NONBANKED {
- uint8_t q;for(q=0;q<4u;++q){set_sprite_tile(q,sprite_frames[44u+q]);set_sprite_prop(q,0);move_sprite(q,x+(q&1u)*8u,y+(q>>1)*8u);}
-}
 void screen_load(uint8_t which) NONBANKED {
  const ScreenAsset *s=&screen_assets[which];uint8_t saved=CURRENT_BANK,i;
  stop_parallax();DISPLAY_OFF;HIDE_WIN;HIDE_SPRITES;
@@ -115,9 +115,10 @@ static void init_art(void){
  set_sprite_data(HUD_DIGIT_BASE,11,hud_digit_tiles);set_sprite_data(HUD_STAR_BASE,2,hud_star_tiles);
  set_sprite_data(RUN_TILE_BASE,16,rescue_run_tiles);
  set_sprite_data(BUS_TILE_BASE,4,bus_tiles);
+ VBK_REG=1;set_sprite_data(0,17,gate_obj_tiles);VBK_REG=0;
  set_sprite_palette(0,8,sprites_palettes);set_sprite_palette(7,1,bus_palette);
  set_bkg_data(FONT_BASE,FONT_TILE_COUNT,font_tiles);
- set_bkg_data(BARRIER_TILE_BASE,8,barricade_tiles);
+ set_bkg_data(BARRIER_TILE_BASE,8,gate_bkg_tiles);
  set_bkg_data(200,8,foreground_tiles);
  for(i=0;i<256u;++i)font_lut[i]=FONT_BASE;
  for(i=0;i<FONT_TILE_COUNT;++i)font_lut[font_character_codes[i]]=FONT_BASE+i;
@@ -190,15 +191,16 @@ static uint8_t bark_unblocked(int16_t from,int16_t to,int16_t y){
 }
 static void bark(void){
  uint8_t i;int16_t x=pixel(player_x),y=pixel(player_y),front=facing_left?x-1:x+16;
- if(pressed&J_B && !bark_cooldown){bark_ticks=8;bark_cooldown=30;sound(1);}
- if(!bark_ticks)return;
- // A contextual rescue bark works from either side, even after jumping over
- // the barrier and reaching the students at the right-hand level boundary.
- if(!barrier_open && x+16>=BARRIER_X-RESCUE_BARK_RANGE && x<=BARRIER_X+32+RESCUE_BARK_RANGE && y+16>=80 && y<=112){
-  barrier_open=1;say(TXT_STUDENT_FOLLOW);
-  // The terrain query and the streamed tile columns share the same open state.
-  barrier_redraw=4;
+ if(pressed&J_B && !bark_cooldown){
+  bark_ticks=8;bark_cooldown=30;sound(1);
+  // Each new bark removes exactly one segment, including when airborne.
+  if(!barrier_open && x+16>=BARRIER_X-RESCUE_BARK_RANGE && x<=BARRIER_X+16+RESCUE_BARK_RANGE){
+   --barrier_strength;barrier_hit_ticks=8;
+   if(!barrier_strength){barrier_open=1;barrier_redraw=2;say(TXT_STUDENT_FOLLOW);}
+   else say(TXT_BARRIER_HIT);
+  }
  }
+ if(!bark_ticks)return;
  for(i=0;i<ENEMY_COUNT;++i){
   Officer *o=&officers[i];int16_t dx=o->x+8-front;
   if(officer_health[i] && !o->stunned && (facing_left?dx<=0 && dx>=-BARK_RANGE:dx>=0 && dx<=BARK_RANGE) && y<o->y+16 && y+16>o->y && bark_unblocked(front,o->x+8,y+8))o->stunned=STUN_TICKS;
@@ -229,19 +231,21 @@ static void update_officers(void){
   if(officer_hit_ticks[i])--officer_hit_ticks[i];
   if(o->stunned)--o->stunned;
   else if(!(clock_tick&1u)){
-   if(o->type){o->y+=o->left?-1:1;if(o->y<=64u)o->left=0;if(o->y>=96u)o->left=1;}
+   if(o->type){o->y+=o->left?-1:1;if(o->y<=80u){o->y=80;o->left=0;}if(o->y>=96u){o->y=96;o->left=1;}}
    else{int16_t next=o->x+(o->left?-1:1),edge=o->left?next:next+15;
     if(next<o->home-24 || next>o->home+24 || solid_at(edge,o->y+8) || !solid_at(edge,o->y+16))o->left^=1u;
     else o->x=next;
    }
   }
-  if(o->x<x+16 && o->x+16>x && o->y<y+16 && o->y+16>y){
-   if(player_vy>0 && previous_player_bottom<=o->y+4 && !officer_hit_ticks[i]){
+  // Reject separated cells before checking the smaller visible-body spans.
+  if(o->x>=x+16 || o->x+16<=x || o->y>=y+16 || o->y+16<=y)continue;
+  // Eight-pixel foot/head spans must cross the visible helmet top. Body
+  // contact excludes transparent margins, the dog's tail and raised ears.
+  if(player_vy>0 && previous_player_bottom<=o->y+2 && y+15>=o->y+2 && x+4<o->x+12 && x+12>o->x+4 && !officer_hit_ticks[i]){
     --officer_health[i];officer_hit_ticks[i]=16;o->stunned=STUN_TICKS;
-    player_y=(o->y-16u)*FP;y=o->y-16u;player_vy=STOMP_SPEED;grounded=0;stomp_bounce=8;sound(4);
+    player_y=(o->y-13u)*FP;y=o->y-13u;player_vy=STOMP_SPEED;grounded=0;stomp_bounce=8;sound(4);
     if(!officer_health[i]){defeated_flags[current_stage]|=1u<<i;reward_active[i]=1;reward_delay[i]=12;reward_x[i]=o->x+4;reward_y[i]=o->y*FP;reward_vy[i]=-32;}
-   }else if(!o->stunned && !officer_hit_ticks[i])kill_player();
-  }
+  }else if(!o->stunned && !officer_hit_ticks[i] && x+3<o->x+12 && x+13>o->x+4 && y+6<o->y+16 && y+15>o->y+3)kill_player();
  }
 }
 static void update_rewards(void){
@@ -283,8 +287,9 @@ static void physics(void){
  if(player_vy<MAX_FALL)player_vy+=GRAVITY;
  if(player_vy>MAX_FALL)player_vy=MAX_FALL;
  if(current_stage==2u && grounded && pixel(player_y)+16==88 && overlap(pixel(player_x),pixel(player_y),16,17,previous_bus_x,88,32,8))player_x+=(bus_x-previous_bus_x)*FP;
- previous_player_bottom=pixel(player_y)+16;move_horizontal();move_vertical();
+ previous_player_bottom=pixel(player_y)+15;move_horizontal();move_vertical();
  if(bark_cooldown)--bark_cooldown;if(bark_ticks)--bark_ticks;
+ if(barrier_hit_ticks)--barrier_hit_ticks;
  if(invulnerable)--invulnerable;
  update_phase=11;bark();update_phase=12;update_officers();if(state!=PLAY)return;
  update_phase=13;update_hazards();if(state!=PLAY)return;update_phase=14;update_rewards();collect();update_phase=15;
@@ -294,67 +299,82 @@ static void physics(void){
  else dog_frame=(clock_tick>>5)&1u;
 }
 static void column(uint16_t world_column){
- uint8_t y,i=0;const uint8_t *tiles=stage->visual+1280u+world_column,*attrs=stage->attributes+1280u+world_column;
- for(y=10;y<18u;++y,++i){
-  if(world_column>=128u){column_tiles[i]=206u+(world_column&1u);column_attributes[i]=6;}
-  else{column_tiles[i]=*tiles;column_attributes[i]=*attrs;}
-  if(barrier_open && world_column>=118u && world_column<122u && y>=12u && y<14u){column_tiles[i]=stage->library[0];column_attributes[i]=stage->cell_palettes[0];}
-  tiles+=128u;attrs+=128u;
+ uint8_t i;
+ if(world_column<128u){
+  const uint8_t *tiles=stage->visual+1280u+world_column,*attrs=stage->attributes+1280u+world_column;
+  for(i=0;i<8u;++i){column_tiles[i]=*tiles;column_attributes[i]=*attrs;if(i<7u){tiles+=128u;attrs+=128u;}}
+ }else for(i=0;i<8u;++i){column_tiles[i]=206u+(world_column&1u);column_attributes[i]=6;}
+ if(barrier_open && world_column>=118u && world_column<120u){
+  for(i=0;i<4u;++i){column_tiles[i]=stage->library[0];column_attributes[i]=stage->cell_palettes[0];}
  }
  set_bkg_tiles(world_column&31u,10,1,8,column_tiles);
  set_bkg_attributes(world_column&31u,10,1,8,column_attributes);
 }
-static void scenic_column(uint16_t world_column,uint8_t city){
- uint8_t i,first=city?6u:0u,count=city?4u:6u;uint16_t index=(uint16_t)first*20u+world_column%20u;
+static void scenic_column(int16_t world_column,uint8_t city){
+ uint8_t i,map_column=(uint16_t)world_column&31u,first=city?6u:0u,count=city?4u:6u;uint16_t index;
+ if(world_column<0)world_column+=20;
+ index=(uint16_t)first*20u+(uint16_t)world_column%20u;
  for(i=0;i<count;++i){column_tiles[i]=stage->depth_map[index];column_attributes[i]=stage->depth_attributes[index];index+=20u;}
- set_bkg_tiles(world_column&31u,first,1,count,column_tiles);set_bkg_attributes(world_column&31u,first,1,count,column_attributes);
+ set_bkg_tiles(map_column,first,1,count,column_tiles);set_bkg_attributes(map_column,first,1,count,column_attributes);
 }
 static void commit_scroll(void){
  CRITICAL {pending_far=(uint16_t)camera_x>>2;pending_city=(uint16_t)camera_x>>1;pending_foreground=(uint8_t)camera_x;}
 }
 static void fill_camera(void){
- uint16_t first=(uint16_t)camera_x>>3,i;for(i=first;i<first+32u;++i)column(i);last_camera_tile=first;
- first=(uint16_t)camera_x>>5;for(i=first;i<first+32u;++i)scenic_column(i,0);last_far_tile=first;
- first=(uint16_t)camera_x>>4;for(i=first;i<first+32u;++i)scenic_column(i,1);last_city_tile=first;commit_scroll();
+ int16_t first=(uint16_t)camera_x>>3,i;for(i=first-4;i<first+28;++i)column(i);last_camera_tile=first;
+ first=(uint16_t)camera_x>>5;for(i=first-4;i<first+28;++i)scenic_column(i,0);last_far_tile=first;
+ first=(uint16_t)camera_x>>4;for(i=first-4;i<first+28;++i)scenic_column(i,1);last_city_tile=first;commit_scroll();
 }
 static void erase_barrier_column(uint8_t world_column){
- uint8_t tiles[2],attrs[2];tiles[0]=tiles[1]=stage->library[0];attrs[0]=attrs[1]=stage->cell_palettes[0];
- set_bkg_tiles(world_column&31u,12,1,2,tiles);set_bkg_attributes(world_column&31u,12,1,2,attrs);
+ uint8_t i;for(i=0;i<4u;++i){column_tiles[i]=stage->library[0];column_attributes[i]=stage->cell_palettes[0];}
+ set_bkg_tiles(world_column&31u,10,1,4,column_tiles);set_bkg_attributes(world_column&31u,10,1,4,column_attributes);
 }
 static void scroll_camera(void){
  int16_t next=pixel(player_x)-72,tile;
  streamed=0;
  if(next<0)next=0;if(next>CAMERA_MAX)next=CAMERA_MAX;camera_x=next;tile=next/8;
- if(last_camera_tile<0)fill_camera();
- else if(tile>last_camera_tile){while(last_camera_tile<tile){++last_camera_tile;column(last_camera_tile+31);streamed=1;}}
- else if(tile<last_camera_tile){while(last_camera_tile>tile){--last_camera_tile;column(last_camera_tile);streamed=1;}}
+ // Four columns behind and seven ahead of the visible area allow one entering
+ // column per frame across all three bands, including immediate reversals.
+ // Large discontinuities only occur in test placement / future room warps.
+ if(tile>last_camera_tile+4 || tile<last_camera_tile-4){fill_camera();streamed=1;}
+ else if(tile>last_camera_tile){++last_camera_tile;column(last_camera_tile+27);streamed=1;}
+ else if(tile<last_camera_tile){--last_camera_tile;column(last_camera_tile-4);streamed=1;}
  tile=(uint16_t)camera_x>>5;
- while(last_far_tile<tile){++last_far_tile;scenic_column(last_far_tile+31,0);streamed=1;}
- while(last_far_tile>tile){--last_far_tile;scenic_column(last_far_tile,0);streamed=1;}
+ if(!streamed && last_far_tile<tile){++last_far_tile;scenic_column(last_far_tile+27,0);streamed=1;}
+ else if(!streamed && last_far_tile>tile){--last_far_tile;scenic_column(last_far_tile-4,0);streamed=1;}
  tile=(uint16_t)camera_x>>4;
- while(last_city_tile<tile){++last_city_tile;scenic_column(last_city_tile+31,1);streamed=1;}
- while(last_city_tile>tile){--last_city_tile;scenic_column(last_city_tile,1);streamed=1;}
- if(barrier_redraw && !streamed){erase_barrier_column(122u-barrier_redraw);--barrier_redraw;}
+ if(!streamed && last_city_tile<tile){++last_city_tile;scenic_column(last_city_tile+27,1);streamed=1;}
+ else if(!streamed && last_city_tile>tile){--last_city_tile;scenic_column(last_city_tile-4,1);streamed=1;}
+ if(barrier_redraw && !streamed){erase_barrier_column(120u-barrier_redraw);--barrier_redraw;}
  commit_scroll();
 }
 static void hud(void){
- uint8_t row;
+ uint8_t row;uint16_t number;
  if(!hud_dirty && !hud_pending)return;
  if(hud_dirty){hud_dirty=0;
   // Total is monotonic; the separate modulo-50 counter still awards lives.
-  hud_digits[0]=total_empanadas/100u;hud_digits[1]=(total_empanadas/10u)%10u;hud_digits[2]=total_empanadas%10u;
+  // At most 105 collectibles exist in this route: bounded subtraction avoids
+  // four expensive 16-bit division calls on a pickup or dialogue frame.
+  number=total_empanadas;hud_digits[0]=hud_digits[1]=0;
+  while(number>=100u){number-=100u;++hud_digits[0];}
+  while(number>=10u){number-=10u;++hud_digits[1];}
+  hud_digits[2]=number;
+  hud_object_count=draw_corner_hud(icon_tiles[0]);hud_lives_cache=lives;
   if(!message_timer){pending_dialog=0;hud_pending=0;hud_mode=0;return;}
   if(hud_mode==message_id+1u)return;
+  // Keep counter changes immediate; prepare a new caption after the short
+  // bark animation, when its hit checks and four effect sprites have ended.
+  if(bark_ticks){hud_dirty=1;return;}
   pending_dialog=0;
   format_dialog(message_id,hud_tiles);
-  hud_mode=message_id+1u;hud_pending=2;
+  hud_mode=message_id+1u;hud_pending=2;return;
  }
  // Only transient messages use the window, clipped to lines 24..39 by LYC.
  row=2u-hud_pending;set_win_tiles(0,row,20,1,&hud_tiles[row*20u]);--hud_pending;
  if(!hud_pending)pending_dialog=1;
 }
-static void oam_begin(void){uint8_t i;for(i=0;i<18u;++i)scanlines[i]=0;oam_next=0;max_scanline_objects=0;}
-static uint8_t object(int16_t x,int16_t y,uint8_t tile,uint8_t properties){
+static void oam_begin(void){uint8_t i;for(i=0;i<18u;++i)scanlines[i]=0;oam_next=hud_object_count;scanlines[0]=scanlines[1]=max_scanline_objects=hud_object_count;}
+uint8_t object(int16_t x,int16_t y,uint8_t tile,uint8_t properties) NONBANKED {
  uint8_t top,bottom;OAM_item_t *item;
  if(oam_next>=40u || x<=-8 || x>=160 || y<=-8 || y>=144)return 0;
  // Conservative eight-line bands cap OAM demand with at most two checks.
@@ -375,28 +395,20 @@ static void pose(int16_t x,int16_t y,uint8_t frame,uint8_t left){
  for(b=top;b<=bottom;++b)if(scanlines[b]>8u)return;
  for(b=top;b<=bottom;++b){scanlines[b]+=2u;if(scanlines[b]>max_scanline_objects)max_scanline_objects=scanlines[b];}
  for(q=0;q<4u;++q){
-  xx=x+(q&1u)*8u;yy=y+(q>>1)*8u;if(xx<=-8 || xx>=160 || yy<=-8 || yy>=128)continue;
+  xx=x+(q&1u)*8u;yy=y+(q>>1)*8u;if(xx<=-8 || xx>=160 || yy<=-8 || yy>=144)continue;
   item=&shadow_OAM[oam_next++];item->x=xx+8;item->y=yy+16;item->tile=sprite_frames[base+(left?(q^1u):q)];item->prop=p;
  }
 }
-static void run_student(int16_t x,uint8_t color){
- uint8_t q,base=RUN_TILE_BASE+color*8u+((clock_tick>>3)&1u)*4u;
- for(q=0;q<4u;++q)object(x+(q&1u)*8,96+(q>>1)*8,base+q,2u+color);
-}
 static void render(void){
- uint8_t i,hx=16;int16_t x=pixel(player_x)-camera_x,y=pixel(player_y);
+ uint8_t i;int16_t x=pixel(player_x)-camera_x,y=pixel(player_y);
+ if(lives!=hud_lives_cache){hud_object_count=draw_corner_hud(icon_tiles[0]);hud_lives_cache=lives;}
+ // Cached corner objects occupy only their active slots.
  oam_begin();
- // Transparent corner overlays have fixed screen positions and OAM priority.
- object(4,6,icon_tiles[0],4);
- if(hud_digits[0]){object(hx,6,HUD_DIGIT_BASE+hud_digits[0],5);hx+=8;}
- if(hud_digits[0] || hud_digits[1]){object(hx,6,HUD_DIGIT_BASE+hud_digits[1],5);hx+=8;}
- object(hx,6,HUD_DIGIT_BASE+hud_digits[2],5);
- for(i=0;i<3u;++i)object(124u+i*12u,6,HUD_STAR_BASE+(lives<=i),4);
- if(lives>3u){object(104,6,HUD_DIGIT_BASE+10u,5);object(112,6,HUD_DIGIT_BASE+lives-3u,5);}
  if(state!=PLAY || !invulnerable || (clock_tick&4u))pose(x,y,dog_frame,facing_left);
+ if(!barrier_open)render_gate(BARRIER_X-camera_x,barrier_strength,barrier_hit_ticks);
  if(state==RESCUING){
   int16_t run=110u-rescue_ticks;
-  run_student(GOAL_X+run-camera_x,0);run_student(GOAL_X+20+run-camera_x,1);
+  run_student(GOAL_X+run-camera_x,0,(clock_tick>>3)&1u);run_student(GOAL_X+20+run-camera_x,1,(clock_tick>>3)&1u);
  }else{
   for(i=0;i<ENEMY_COUNT;++i){Officer *o=&officers[i];if(officer_health[i] && o->x+16>camera_x && o->x<camera_x+160){pose(o->x-camera_x,o->y,o->stunned?18u:o->type?19u:16u+((clock_tick>>3)&1u),o->left);if(o->stunned || officer_health[i]==1u)object(o->x+4-camera_x,o->y-8,icon_tiles[2],officer_health[i]==1u?4u:5u);}}
   pose(GOAL_X-camera_x,96,20u+((clock_tick>>4)&1u),0);pose(GOAL_X+20-camera_x,96,22u+((clock_tick>>4)&1u),0);
@@ -413,17 +425,11 @@ static void render(void){
  last_oam_count=oam_next;while(oam_next<40u)shadow_OAM[oam_next++].y=0;
 }
 void render_complete(void) NONBANKED {update_phase=0;}
-static void reset_officers(void){
- uint8_t i;static const uint16_t starts[5]={184,360,536,704,888};
- for(i=0;i<ENEMY_COUNT;++i){officers[i].x=officers[i].home=starts[i];officers[i].y=96;officers[i].stunned=0;officers[i].left=i&1u;officers[i].type=current_stage==1u && i==2u;
-  officer_health[i]=defeated_flags[current_stage]&(1u<<i)?0u:2u;officer_hit_ticks[i]=0;
-  reward_active[i]=!officer_health[i] && !(reward_collected_flags[current_stage]&(1u<<i));reward_x[i]=starts[i]+4;reward_y[i]=104*FP;reward_vy[i]=reward_delay[i]=0;
- }
-}
 static void spawn(void){
  player_x=(checkpoint_flags&(1u<<current_stage)?CHECKPOINT_X:24)*FP;player_y=96*FP;
  player_vx=player_vy=0;grounded=1;facing_left=sprinting=coyote=jump_buffer=bark_ticks=bark_cooldown=0;
  invulnerable=90;dog_frame=0;tap_timer=stomp_bounce=0;barrier_open=0;camera_x=pixel(player_x)-72;if(camera_x<0)camera_x=0;
+ barrier_strength=3;barrier_hit_ticks=0;
  reset_officers();bus_x=previous_bus_x=624;message_timer=barrier_redraw=hazard_tick=coin_cursor=render_coin_cursor=0;hud_dirty=1;
 }
 static void load_stage(uint8_t restart){
@@ -497,11 +503,13 @@ void main(void){
    ++simulation_frame;previous_bus_x=bus_x;if(++hazard_tick==180u)hazard_tick=0;
    if(!(clock_tick&3u))bus_x+=((clock_tick>>7)&1u)?-1:1;
    update_phase=1;physics();if(message_timer && !--message_timer)hud_dirty=1;
-   update_phase=2;scroll_camera();update_phase=3;if(!streamed)hud();update_phase=4;render();render_complete();
+   // Dialogue preparation follows a bark on the next frame, spreading the
+   // CPU cost while the gate meter and bark animation update immediately.
+   update_phase=2;scroll_camera();update_phase=3;if(!streamed && !(pressed&J_B))hud();update_phase=4;render();render_complete();
   }else if(state==DYING){
    if(message_timer && !--message_timer)hud_dirty=1;hud();render();if(!--death_ticks){if(lives)load_stage(1);else{state=GAME_OVER;ui_show(state);}}
   }else if(state==RESCUING){
-   if(barrier_redraw){erase_barrier_column(122u-barrier_redraw);--barrier_redraw;}
+   if(barrier_redraw){erase_barrier_column(120u-barrier_redraw);--barrier_redraw;}
    render();if(message_timer && !--message_timer)hud_dirty=1;hud();if(!--rescue_ticks)stage_complete();
   }else if(state==ENDING)ending_update();
   else{action=ui_update();if(action)transition(action);}

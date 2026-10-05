@@ -50,6 +50,7 @@
 #define TXT_STUDENT_FOLLOW 39u
 #define TXT_STUDENT_THANKS 40u
 #define TXT_HAZARD_WARNING 41u
+#define TXT_BARRIER_HIT 42u
 typedef struct {
  uint8_t bank, tile_count, depth_count;
  const uint8_t *tiles, *library, *cell_palettes, *depth_tiles, *depth_map, *depth_attributes, *terrain, *visual, *attributes;
@@ -61,7 +62,7 @@ typedef struct {
 typedef struct { uint8_t bank, count; const uint8_t *tiles, *map, *attributes; const uint16_t *palettes; } ScreenAsset;
 extern const StageAsset stage_assets[5];
 extern const ScreenAsset screen_assets[14];
-extern const uint8_t * const game_text[2][42];
+extern const uint8_t * const game_text[2][43];
 extern const uint8_t rescue_run_tiles[256];
 extern const uint8_t barricade_tiles[128];
 extern const uint8_t bus_tiles[64];
@@ -79,5 +80,5 @@ extern const uint8_t presidential_standard_tiles[192], presidential_standard_map
 #define SCREEN_RESCUE 11u
 #define SCREEN_MEDAL 12u
 #define SCREEN_FLAG 13u
-extern const uint8_t foreground_tiles[128],hud_digit_tiles[176],hud_star_tiles[32];
+extern const uint8_t foreground_tiles[128],hud_digit_tiles[176],hud_star_tiles[32],gate_obj_tiles[272],gate_bkg_tiles[128];
 #endif

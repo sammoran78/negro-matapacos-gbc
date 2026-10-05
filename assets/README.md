@@ -48,7 +48,7 @@ Use `native/` and `gbdk/` for game integration. The enlarged source illustration
 | 14 | run_landing | After airborne stretch |
 | 15 | run_push | After recoil |
 
-The run order is **2, 12, 3, 13, 4, 14, 5, 15**, with an 80 ms art-preview cadence. Timing and sequences are in the manifest. Sprint can use a faster cadence linked to travel speed. The full cell remains the planned collision box. These suggestions do not implement movement or physics.
+The run order is **2, 12, 3, 13, 4, 14, 5, 15**, with an 80 ms art-preview cadence. Timing and sequences are in the manifest. Sprint can use a faster cadence linked to travel speed. Terrain collision uses the full cell; the playable ROM narrows police contact to the visible body and requires a descending foot/helmet crossing for stomps.
 
 `native/dog-detail-24.png` is a separate 96 x 96 comparison atlas with 24 x 24 cells. Its ROM export, `gbdk/dog_detail_24.*`, contains 144 tiles (16 frames × 9 tiles). It is an optional alternative requiring nine OAM objects, a larger collision box and renewed scanline checks. Stream only the active 144-byte frame into nine reserved tile slots if selected; do not load all 144 patterns over the current bank layout. The original 16 x 16/four-sprite specification remains the default.
 
@@ -72,7 +72,7 @@ To face left, swap left/right quadrants and set horizontal flip on each sprite. 
 | 2 | Empanada, extra-life dog head, Chilean checkpoint flag, stun star |
 | 3 | Small/large bark wave, small/large dust puff |
 
-The officer's climbing frame contains the character alone; the ladder belongs to the campus background tileset.
+The officer's climbing frame contains the character alone; the ladder belongs to the campus background tileset. Runtime placement uses both eight-pixel ladder columns at x=512–527, with the officer centered on them and moving within y=80–96.
 
 `native/icons.png` contains the empanada, extra-life head, and stun star as true 8 x 8 cells in a 24 x 8 sheet. Use `sprites_icon_tiles` and `sprites_icon_palettes` to draw each with **one** hardware sprite. Tile IDs are deduplicated and must come from those tables or the manifest. Frame quadrants are also independently packed: never assume four consecutive IDs or infer an actor's global frame index from the dog count.
 
@@ -128,9 +128,11 @@ The title portrait is entirely background artwork. Both prompt states share one 
 
 `native/font.png` is 128 x 32 pixels and provides 8 x 8 glyph cells with a 5 x 7 pixel drawing inside. It includes Ñ, Á, É, Í, Ó, Ú, Ü, ¡, and ¿, as well as ordinary punctuation. Its glyph order is recorded in the manifest, and the complete 54-glyph font is exported separately in `gbdk/font.*`. `font_character_codes` uses Latin-1 codepoints; the future text renderer must map its chosen string encoding to these glyph IDs. Gameplay libraries currently include letters, digits, space, and slash. Load other glyphs as needed or place the full dialogue font in another VRAM bank when implementing speech bubbles. Render counters with tiles rather than `printf()`.
 
-Interface strings are centralized in `localization.json`: 41 stable IDs, each in English and Spanish, including map labels, locks, unlock feedback and the ceremony. The HTML flow renders the confirmed language; native PNGs show Spanish examples. Future runtime text must use this choice for menus, HUD, dialogue, prompts and the ending. World-art lettering stays Spanish. Fresh boot always asks for language; session transitions preserve it. These are mandatory requirements in `PLAN.md`.
+Interface strings are centralized in `localization.json`: 43 stable IDs, each in English and Spanish, including map labels, locks, unlock feedback, barricade hit feedback and the ceremony. The HTML flow renders the confirmed language; native PNGs show Spanish examples. Runtime text uses this choice for menus, dialogue, prompts and the ending. World-art lettering stays Spanish. Fresh boot always asks for language; session transitions preserve it. These are mandatory requirements in `PLAN.md`.
 
-The bottom 16 pixels of gameplay mockups are reserved for the HUD. Their labels show empanada progress, lives, and the stage name. Menu screens load their own tiles and background palettes.
+Earlier gameplay mockups retain their bottom HUD study. The playable ROM now uses transparent upper-corner sprites: an empanada and outlined running total at the upper left, and three filled/hollow life stars at the upper right, plus a +N extra-life badge. Temporary localized messages occupy lines 24–39; all lower pixels show terrain. Menu screens load their own tiles and background palettes.
+
+Native HUD patterns and the new steel barricade are authored in `tools/build-game-assets.cjs` as exact 2bpp tiles. Bank-0 OBJ 117–127 hold outlined digits/+ and 182–183 hold the life stars. The full-height rescue gate combines bank-1 OBJ 0–16 for its post, wire panels, Spanish PARE sign and strength gauge with bank-0 BG 216–223 for its lower panels and striped foundation. Three distinct barks remove the three gauge segments before clearing the gate. Upper sprite pieces follow the foreground camera across the scenic parallax bands.
 
 ## Hardware budget
 
@@ -159,7 +161,7 @@ The GBC has one background plane. Where a platform overlaps scenery, the compile
 
 `<stage>_layered.c/.h` supplies the full 20 x 18 tile/attribute map: upper twelve rows use `<stage>_depth_composite` bank-1 patterns, lower six use `<stage>_scene` bank-0 patterns. `native/<stage>-layered-background.png` is verified against this mixed-bank map before sprites are drawn. The manifest records both libraries and shared palettes in `layered_scenes`.
 
-The gallery retains the earlier static/composite art studies. The playable ROM now derives separate runtime strips with `tools/build-game-assets.cjs`: sky/Andes at camera/4 on lines 0–47, city at camera/2 on lines 48–79, and full-speed terrain from line 80. Scenic pixels are converted to six stage palettes with an atmospheric tint; palette 6 supplies saturated orange/gold terrain and palette 7 supplies the HUD. Eight new foreground patterns occupy bank-0 BG IDs 200–207 with dark outlines and bright top edges. City silhouettes end above all platform tops. The original source PNGs and gallery exports remain available for comparison. LCD/LYC interrupts and independent column streaming run in `platformer.c`; actual per-scanline scroll values, tile/attribute wraps and frame timing are verified in PyBoy. Vertical rooms and tall props crossing a split need a revised layout.
+The gallery retains the earlier static/composite art studies. The playable ROM derives separate runtime strips with `tools/build-game-assets.cjs`: sky/Andes at camera/4 on lines 0–47, city at camera/2 on lines 48–79, and full-speed terrain from line 80. Scenic pixels use six stage palettes with an atmospheric tint; palette 6 supplies saturated orange/gold terrain and palette 7 supplies temporary text popups. Eight foreground patterns occupy bank-0 BG IDs 200–207 with dark outlines and bright top edges. City silhouettes end above all platform tops. The original source PNGs and gallery exports remain available for comparison. LCD/LYC interrupts and independent column streaming run in `platformer.c`; actual per-scanline scroll values, tile/attribute wraps and frame timing are verified in PyBoy. The tall rescue gate uses upper sprites to cross the splits. Vertical rooms still need a revised layout.
 
 The map appears after controls and before Alameda. Five stages form a visible path: Alameda, Campus, Plaza de la Dignidad, Río Mapocho, La Moneda. Its five PNG/C scene states show progressive unlocks with numbered open nodes, lock icons and muted dotted versus solid teal paths. Nodes, route segments, labels and progress rules are in `manifest.world_map`. The gallery can reject a locked-node selection and simulate rescues; this does not implement game progress or saves.
 

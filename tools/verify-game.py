@@ -36,12 +36,13 @@ class Game:
     def tap(self, button, n=2):
         self.gb.button_press(button);self.tick(n);self.gb.button_release(button);self.tick(2)
     def shot(self, name): self.gb.screen.image.save(ROOT / 'build' / (name+'.png'))
-    def line(self,row):
+    def line(self,row,window=False):
         codes=(ROOT/'assets/gbdk/font.c').read_text()
         raw=re.search(r'font_character_codes\[54\] = \{(.*?)\};',codes,re.S)[1]
         chars=[int(n,0) for n in re.findall(r'0x[0-9a-f]+|\d+',raw)]
         reverse={self.gb.memory[SYMBOLS['font_lut']+c]:chr(c) for c in chars}
-        return ''.join(reverse.get(self.gb.memory[0,0x9800+row*32+x],'?') for x in range(20)).strip()
+        base=0x9c00 if window else 0x9800
+        return ''.join(reverse.get(self.gb.memory[0,base+row*32+x],'?') for x in range(20)).strip()
     def oam_max(self):
         spans=[0]*145
         for i in range(40):
@@ -78,7 +79,7 @@ class Game:
             if x<0 or x>=1024 or y<0:return 4
             if y>=144:return 0
             return terrain[(y//8)*128+x//8]
-        held=set();frames=[];deaths=0;maximum=0;hardware_max=0;updates=[];previous_state=4;missed=[];reached_students_before_bark=False
+        held=set();frames=[];deaths=0;maximum=0;hardware_max=0;updates=[];previous_state=4;missed=[];reached_students_before_bark=False;barricade_stop_seen=False;max_closed_x=0
         def set_button(name,on):
             if on and name not in held:self.gb.button_press(name);held.add(name)
             if not on and name in held:self.gb.button_release(name);held.remove(name)
@@ -93,7 +94,7 @@ class Game:
                 if capture and frames:
                     enlarged=[im.resize((480,432),resample=0) for im in frames]
                     enlarged[0].save(ROOT/'build'/'gameplay.gif',save_all=True,append_images=enlarged[1:],duration=34,loop=0)
-                return {'language':'es' if self.u8('language') else 'en','stage':name,'frames':frame,'deaths':deaths,'max_objects_per_band':maximum,'hardware_scanline_max':hardware_max,'steps':sum(updates),'overruns':sum(n==0 for n in updates),'max_steps_per_frame':max(updates),'missed':missed,'reached_students_before_bark':reached_students_before_bark}
+                return {'language':'es' if self.u8('language') else 'en','stage':name,'frames':frame,'deaths':deaths,'max_objects_per_band':maximum,'hardware_scanline_max':hardware_max,'steps':sum(updates),'overruns':sum(n==0 for n in updates),'max_steps_per_frame':max(updates),'missed':missed,'reached_students_before_bark':reached_students_before_bark,'barricade_stop_seen':barricade_stop_seen,'max_closed_x':max_closed_x}
             if state==9:raise AssertionError('Auto-player exhausted lives in '+name)
             if state==6:
                 deaths+=int(previous_state!=6)
@@ -107,10 +108,12 @@ class Game:
                 wall=tile(ahead,y+8) in (1,2,3,4,6)
                 gap=tile(ahead,y+16) in (0,5) and y>=72
                 spray=stage==2 and 476<x<536 and y>72
-                # Reproduce reaching the students by jumping over the closed
-                # barricade, then barking while facing away at the right edge.
-                bark=x>(1000 if late_rescue else 900)
-                if late_rescue and x>=976 and not self.u8('barrier_open'):reached_students_before_bark=True
+                # A late rescue runs into the full-height gate before barking.
+                bark=x>=(928 if late_rescue else 902)
+                if not self.u8('barrier_open'):
+                    max_closed_x=max(max_closed_x,x)
+                    if x>=928:barricade_stop_seen=True
+                    if x>=976:reached_students_before_bark=True
                 base=SYMBOLS['officers']
                 for i in range(5):
                     addr=base+i*8;ex=self.gb.memory[addr]|self.gb.memory[addr+1]<<8
@@ -122,7 +125,11 @@ class Game:
                 set_button('b',bark and self.u8('bark_cooldown')==0)
                 set_button('right',True)
             maximum=max(maximum,self.u8('max_scanline_objects'))
-            hardware_max=max(hardware_max,self.oam_max());assert hardware_max<=10
+            hardware_max=max(hardware_max,self.oam_max())
+            if hardware_max>10:
+                self.shot('object-overflow-'+name)
+                objects=[tuple(self.gb.memory[0xfe00+i*4:0xfe04+i*4]) for i in range(40)]
+                raise AssertionError('OAM overflow '+str((name,frame,self.s16('player_x')//16,self.u8('update_phase'),self.u8('last_oam_count'),objects)))
             self.tick()
             now=self.u16('simulation_frame');
             if state==4 and self.u8('state')==4:
@@ -167,6 +174,8 @@ if __name__=='__main__':
     g.shot('medal-es')
     g.tick(500);assert g.u8('state')==11 and g.u8('completed')==31
     assert g.line(16)=='FIN';g.shot('ending-es')
+    for result in results:
+        if result['overruns']:print('Frame budget exceeded:',result,flush=True)
     assert all(r['overruns']==0 for r in results), 'Gameplay dropped an emulated frame'
     print(json.dumps(results,indent=2))
     (ROOT/'build/controller-validation.json').write_text(json.dumps(results,indent=2))

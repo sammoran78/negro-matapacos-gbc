@@ -25,7 +25,7 @@ for bark in range(3):
 # Trigger a pickup tone on the same simulation frame as a rescue bark. Channel
 # 4 must keep the bark audible when the medal/rescue/pickup voice uses channel 2.
 g.put8('state',5);sample(5);g.put16('player_x',976*16);g.put16('player_y',96*16)
-g.put8('bark_cooldown',0);g.put8('state',4);g.gb.button_press('b');a=sample(4)
+g.put8('barrier_strength',1);g.put8('bark_cooldown',0);g.put8('state',4);g.gb.button_press('b');a=sample(4)
 check('rescue bark remains audible beside students',g.u8('barrier_open')==1 and np.ptp(a)>10 and g.gb.memory[0xff26]&8)
 check('bark noise is routed to both speakers',g.gb.memory[0xff25]&0x88==0x88)
 g.gb.button_release('b');sample(10)

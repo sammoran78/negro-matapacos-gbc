@@ -21,6 +21,10 @@ def stars(g):
     return [(x,tile==182) for x,y,tile,pal in objects(g) if y==6 and x>=124 and tile in (182,183)]
 def place(g,x,y=96):
     g.put8('state',5);g.tick(5)
+    for _ in range(60):
+        if g.u8('update_phase')==0:break
+        g.tick()
+    else:raise AssertionError('Graphics update did not finish before RAM placement')
     g.put16('player_x',x*16);g.put16('player_y',y*16);g.put16('player_vy',0)
     g.put8('grounded',1);g.put8('invulnerable',255)
     for i in range(5):g.gb.memory[SYMBOLS['officers']+i*8+5]=255
@@ -74,9 +78,13 @@ g.put8('invulnerable',0);g.put16('player_y',145*16);g.tick(7)
 check('actual death removes one gold star',g.u8('state')==6 and sum(active for x,active in stars(g))==2)
 g.shot('corner-hud-life-lost');g.tick(100)
 check('total and life overlay survive checkpoint respawn',counter(g)==saved+1 and sum(active for x,active in stars(g))==2)
+place(g,882)
+check('English rescue popup wraps whole words',g.line(0,window=True)=='BARK AT THE' and g.line(1,window=True)=='BARRICADE!')
 g.close()
 g=Game();g.start(True);place(g,448)
-check('Spanish checkpoint popup uses localized glyphs',g.gb.memory[0,0x9c00+2]==g.gb.memory[SYMBOLS['font_lut']+ord('P')] and g.u8('dialog_visible')==1)
-g.shot('corner-hud-checkpoint-es');g.close()
+check('Spanish checkpoint popup uses localized glyphs',g.line(0,window=True)=='PUNTO DE CONTROL' and g.u8('dialog_visible')==1)
+g.shot('corner-hud-checkpoint-es');g.tick(110);place(g,882)
+check('Spanish rescue popup wraps whole words',g.line(0,window=True)=='¡LADRA A LA' and g.line(1,window=True)=='BARRICADA!')
+g.close()
 (ROOT/'build/hud-validation.json').write_text(json.dumps({'passed':True,'checks':checks,'count':len(checks)},indent=2))
 print('PASS:',len(checks),'ROM overlay HUD checks')
