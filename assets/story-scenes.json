@@ -1,0 +1,94 @@
+[
+  {
+    "name": "story_campus",
+    "text_id": "story_campus",
+    "tiles": 219,
+    "bank": 9,
+    "source": "source/story-campus.png",
+    "illustration": {
+      "x": 0,
+      "y": 8,
+      "width": 160,
+      "height": 96
+    },
+    "bubble": {
+      "x": 8,
+      "y": 104,
+      "columns": 18,
+      "rows": 3
+    },
+    "references": [
+      "title-chile.png",
+      "title-screen-4x.png"
+    ]
+  },
+  {
+    "name": "story_plaza",
+    "text_id": "story_plaza",
+    "tiles": 227,
+    "bank": 10,
+    "source": "source/story-plaza.png",
+    "illustration": {
+      "x": 0,
+      "y": 8,
+      "width": 160,
+      "height": 96
+    },
+    "bubble": {
+      "x": 8,
+      "y": 104,
+      "columns": 18,
+      "rows": 3
+    },
+    "references": [
+      "title-chile.png",
+      "title-screen-4x.png"
+    ]
+  },
+  {
+    "name": "story_mapocho",
+    "text_id": "story_mapocho",
+    "tiles": 240,
+    "bank": 11,
+    "source": "source/story-mapocho.png",
+    "illustration": {
+      "x": 0,
+      "y": 8,
+      "width": 160,
+      "height": 96
+    },
+    "bubble": {
+      "x": 8,
+      "y": 104,
+      "columns": 18,
+      "rows": 3
+    },
+    "references": [
+      "title-chile.png",
+      "title-screen-4x.png"
+    ]
+  },
+  {
+    "name": "story_moneda",
+    "text_id": "story_moneda",
+    "tiles": 228,
+    "bank": 12,
+    "source": "source/story-moneda.png",
+    "illustration": {
+      "x": 0,
+      "y": 8,
+      "width": 160,
+      "height": 96
+    },
+    "bubble": {
+      "x": 8,
+      "y": 104,
+      "columns": 18,
+      "rows": 3
+    },
+    "references": [
+      "title-chile.png",
+      "title-screen-4x.png"
+    ]
+  }
+]

@@ -7,7 +7,7 @@ from pyboy import PyBoy
 
 SYMBOLS = {}
 for line in (ROOT / 'build/matapacos.map').read_text().splitlines():
-    m = re.match(r'\s+([0-9A-F]{8})\s+_([A-Za-z]\w*)\s+platformer\s*$', line)
+    m = re.match(r'\s+([0-9A-F]{8})\s+_([A-Za-z]\w*)\s+(?:platformer|bosses|ui)\s*$', line)
     if m:
         SYMBOLS[m[2]] = int(m[1], 16)
 
@@ -36,13 +36,13 @@ class Game:
     def tap(self, button, n=2):
         self.gb.button_press(button);self.tick(n);self.gb.button_release(button);self.tick(2)
     def shot(self, name): self.gb.screen.image.save(ROOT / 'build' / (name+'.png'))
-    def line(self,row,window=False):
+    def line(self,row,window=False,left=0,width=20):
         codes=(ROOT/'assets/gbdk/font.c').read_text()
         raw=re.search(r'font_character_codes\[54\] = \{(.*?)\};',codes,re.S)[1]
         chars=[int(n,0) for n in re.findall(r'0x[0-9a-f]+|\d+',raw)]
         reverse={self.gb.memory[SYMBOLS['font_lut']+c]:chr(c) for c in chars}
         base=0x9c00 if window else 0x9800
-        return ''.join(reverse.get(self.gb.memory[0,base+row*32+x],'?') for x in range(20)).strip()
+        return ''.join(reverse.get(self.gb.memory[0,base+row*32+x],'?') for x in range(left,left+width)).strip()
     def oam_max(self):
         spans=[0]*145
         for i in range(40):
@@ -93,7 +93,7 @@ class Game:
                 self.tick(50)
                 if capture and frames:
                     enlarged=[im.resize((480,432),resample=0) for im in frames]
-                    enlarged[0].save(ROOT/'build'/'gameplay.gif',save_all=True,append_images=enlarged[1:],duration=34,loop=0)
+                    enlarged[0].save(ROOT/'build'/((name+'-boss.gif') if stage>=3 else 'gameplay.gif'),save_all=True,append_images=enlarged[1:],duration=34,loop=0)
                 return {'language':'es' if self.u8('language') else 'en','stage':name,'frames':frame,'deaths':deaths,'max_objects_per_band':maximum,'hardware_scanline_max':hardware_max,'steps':sum(updates),'overruns':sum(n==0 for n in updates),'max_steps_per_frame':max(updates),'missed':missed,'reached_students_before_bark':reached_students_before_bark,'barricade_stop_seen':barricade_stop_seen,'max_closed_x':max_closed_x}
             if state==9:raise AssertionError('Auto-player exhausted lives in '+name)
             if state==6:
@@ -124,6 +124,15 @@ class Game:
                 elif self.s16('player_vy')>=0:set_button('a',False)
                 set_button('b',bark and self.u8('bark_cooldown')==0)
                 set_button('right',True)
+                if stage>=3 and self.u8('boss_active') and self.u8('boss_health'):
+                    bx=self.s16('boss_x');phase=self.u8('boss_phase')
+                    target=bx-(72 if stage==3 else 96) if phase in (1,2) else bx-32
+                    move_right=x<target-2;move_left=x>target+2
+                    if phase not in (1,2) and not move_left and self.u8('facing_left'):move_right=True
+                    set_button('right',move_right);set_button('left',move_left)
+                    set_button('a',False)
+                    set_button('b',phase not in (1,2) and not move_left and x>=bx-40 and self.u8('bark_cooldown')==0)
+                else:set_button('left',False)
             maximum=max(maximum,self.u8('max_scanline_objects'))
             hardware_max=max(hardware_max,self.oam_max())
             if hardware_max>10:
@@ -136,7 +145,7 @@ class Game:
                 delta=(now-last_step)&65535;updates.append(delta)
                 if delta==0:missed.append((self.s16('player_x')//16,self.u8('update_phase')))
             last_step=now;previous_state=state
-            if capture and frame%2==0:frames.append(self.gb.screen.image.copy())
+            if capture and frame%2==0 and (stage<3 or self.u8('boss_active')):frames.append(self.gb.screen.image.copy())
             if frame%300==0:print(name,'frame',frame,'x',self.s16('player_x')//16,'state',self.u8('state'),flush=True)
         self.shot('stuck-'+name)
         raise AssertionError('Auto-player stuck in '+name+' at '+str(self.s16('player_x')//16))
@@ -151,20 +160,30 @@ if __name__=='__main__':
     results=[]
     for stage in range(5):
         assert g.u8('current_stage')==stage
-        results.append(g.drive_stage(capture=stage==0))
+        results.append(g.drive_stage(capture=stage in (0,3,4)))
         g.shot(['alameda','campus','plaza','mapocho','moneda'][stage]+'-rescue')
         if stage<4:
+            loc=json.loads((ROOT/'assets/localization.json').read_text(encoding='utf8'))['strings']
+            speech=' '.join(s for s in (g.line(row,left=1,width=18) for row in range(13,16)) if s)
+            assert speech==loc['story_'+['campus','plaza','mapocho','moneda'][stage]]['en'], speech
+            g.shot('story-'+['campus','plaza','mapocho','moneda'][stage]+'-en')
             assert g.u8('unlocked')==stage+2
             g.tap('start');g.tick(40);assert g.u8('state')==3
             g.tap('a');g.tick(40);assert g.u8('state')==4
     g.tick(600);assert g.u8('state')==11 and g.u8('completed')==31
-    assert g.line(16)=='THE END'
+    assert g.line(0)=='THE END'
+    speech=' '.join(s for s in (g.line(row,left=1,width=18) for row in range(13,16)) if s)
+    assert speech==loc['ending_final']['en'],speech
+    g.shot('ending-final-en')
     g.shot('ending-complete')
     g.close()
     g=Game();g.start(True)
     for stage in range(5):
         results.append(g.drive_stage())
         if stage<4:
+            speech=' '.join(s for s in (g.line(row,left=1,width=18) for row in range(13,16)) if s)
+            assert speech==loc['story_'+['campus','plaza','mapocho','moneda'][stage]]['es'], speech
+            g.shot('story-'+['campus','plaza','mapocho','moneda'][stage]+'-es')
             g.tap('start');g.tick(40);g.tap('a');g.tick(40)
     # Check the real ceremony captions and the completed Spanish end state.
     for _ in range(300):
@@ -173,7 +192,10 @@ if __name__=='__main__':
     g.tick(30);assert g.line(0)=='UNA MEDALLA AL HÉROE'
     g.shot('medal-es')
     g.tick(500);assert g.u8('state')==11 and g.u8('completed')==31
-    assert g.line(16)=='FIN';g.shot('ending-es')
+    assert g.line(0)=='FIN'
+    speech=' '.join(s for s in (g.line(row,left=1,width=18) for row in range(13,16)) if s)
+    assert speech==loc['ending_final']['es'],speech
+    g.shot('ending-final-es');g.shot('ending-es')
     for result in results:
         if result['overruns']:print('Frame budget exceeded:',result,flush=True)
     assert all(r['overruns']==0 for r in results), 'Gameplay dropped an emulated frame'

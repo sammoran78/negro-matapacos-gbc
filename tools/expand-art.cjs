@@ -72,8 +72,8 @@ module.exports = async function expand(a) {
   fs.writeFileSync(path.join(OUT,'gbdk','dog_detail_24.2bpp'),Buffer.from(detailBytes));
   manifest.sheets.dog_detail_24={path:'native/dog-detail-24.png',width:96,height:96,cell:[24,24],optional:true,objects_per_pose:9,frames:manifest.sheets.dog.frames,
     frame_bytes:144,rom_tiles:144,resident_tiles_with_streaming:9,rendering:'Alternative requiring frame streaming and revised OAM/collision budgets; default remains 16x16'};
-  const nodes=[[44,112],[24,76],[124,84],[104,48],[72,80]];
-  const segments=[[[44,112],[24,112],[24,76]],[[24,76],[44,76],[44,120],[124,120],[124,84]],[[124,84],[136,84],[136,48],[104,48]],[[104,48],[88,48],[88,80],[72,80]]];
+  const nodes=[[24,76],[44,112],[124,84],[104,48],[72,80]];
+  const segments=[[[24,76],[24,112],[44,112]],[[44,112],[44,120],[124,120],[124,84]],[[124,84],[136,84],[136,48],[104,48]],[[104,48],[88,48],[88,80],[72,80]]];
   manifest.world_map={stage_order:route,nodes:route.map((id,i)=>({id,x:nodes[i][0],y:nodes[i][1],text_id:'stage_'+id})),segments,
     initial_unlocked:1,unlock_rule:'Clearing stage i unlocks only i+1; retries and replays never relock nodes.',
     geography:'Schematic Santiago: campus west, river north of Alameda, plaza east, palace central south of river.',

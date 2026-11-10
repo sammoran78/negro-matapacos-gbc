@@ -51,6 +51,19 @@
 #define TXT_STUDENT_THANKS 40u
 #define TXT_HAZARD_WARNING 41u
 #define TXT_BARRIER_HIT 42u
+#define TXT_CONTROLS_BOSSES 43u
+#define TXT_BOSS_NET 44u
+#define TXT_BOSS_TANK 45u
+#define TXT_BOSS_NET_WARN 46u
+#define TXT_BOSS_TANK_WARN 47u
+#define TXT_BOSS_DODGE 48u
+#define TXT_BOSS_OPEN 49u
+#define TXT_BOSS_HURT 50u
+#define TXT_STORY_CAMPUS 51u
+#define TXT_STORY_PLAZA 52u
+#define TXT_STORY_MAPOCHO 53u
+#define TXT_STORY_MONEDA 54u
+#define TXT_ENDING_FINAL 55u
 typedef struct {
  uint8_t bank, tile_count, depth_count;
  const uint8_t *tiles, *library, *cell_palettes, *depth_tiles, *depth_map, *depth_attributes, *terrain, *visual, *attributes;
@@ -61,8 +74,8 @@ typedef struct {
 } StageAsset;
 typedef struct { uint8_t bank, count; const uint8_t *tiles, *map, *attributes; const uint16_t *palettes; } ScreenAsset;
 extern const StageAsset stage_assets[5];
-extern const ScreenAsset screen_assets[14];
-extern const uint8_t * const game_text[2][43];
+extern const ScreenAsset screen_assets[19];
+extern const uint8_t * const game_text[2][56];
 extern const uint8_t rescue_run_tiles[256];
 extern const uint8_t barricade_tiles[128];
 extern const uint8_t bus_tiles[64];
@@ -81,4 +94,29 @@ extern const uint8_t presidential_standard_tiles[192], presidential_standard_map
 #define SCREEN_MEDAL 12u
 #define SCREEN_FLAG 13u
 extern const uint8_t foreground_tiles[128],hud_digit_tiles[176],hud_star_tiles[32],gate_obj_tiles[272],gate_bkg_tiles[128];
+#define BOSS_OFFICER_TILE 17u
+#define BOSS_NET_RAISED_TILE 35u
+#define BOSS_NET_SWING_TILE 39u
+#define BOSS_CANNON_TILE 45u
+#define BOSS_WATER_TILE 51u
+#define BOSS_METER_TILE 55u
+#define BOSS_WARNING_TILE 88u
+#define BOSS_HURT_TILE 89u
+#define BOSS_TRUCK_TILE 90u
+#define BOSS_SPLASH_TILE 102u
+#define BOSS_OBJ_TILE_COUNT 89u
+extern const uint8_t boss_obj_tiles[1424];
+extern const uint16_t boss_normal_palette[4],boss_hurt_palette[4],boss_water_palette[4],boss_default_water_palette[4];
+#define SCREEN_STORY 14u
+#define SCREEN_FINAL 18u
+extern const uint8_t story_campus_tiles[3504],story_campus_map[360],story_campus_attributes[360];
+extern const uint16_t story_campus_palettes[32];
+extern const uint8_t story_plaza_tiles[3632],story_plaza_map[360],story_plaza_attributes[360];
+extern const uint16_t story_plaza_palettes[32];
+extern const uint8_t story_mapocho_tiles[3840],story_mapocho_map[360],story_mapocho_attributes[360];
+extern const uint16_t story_mapocho_palettes[32];
+extern const uint8_t story_moneda_tiles[3648],story_moneda_map[360],story_moneda_attributes[360];
+extern const uint16_t story_moneda_palettes[32];
+extern const uint8_t ending_final_tiles[3712],ending_final_map[360],ending_final_attributes[360];
+extern const uint16_t ending_final_palettes[32];
 #endif

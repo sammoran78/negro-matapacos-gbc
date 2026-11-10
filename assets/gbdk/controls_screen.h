@@ -2,8 +2,8 @@
 #ifndef CONTROLS_SCREEN_H
 #define CONTROLS_SCREEN_H
 #include <stdint.h>
-#define CONTROLS_SCREEN_TILE_COUNT 117u
-extern const uint8_t controls_screen_tiles[1872];
+#define CONTROLS_SCREEN_TILE_COUNT 131u
+extern const uint8_t controls_screen_tiles[2096];
 extern const uint8_t controls_screen_map[360];
 extern const uint8_t controls_screen_attributes[360];
 extern const uint16_t controls_screen_palettes[32];

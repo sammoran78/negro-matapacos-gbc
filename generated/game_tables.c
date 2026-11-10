@@ -40,7 +40,17 @@ const StageAsset stage_assets[5] = {
 #include "../assets/gbdk/ceremony_rescue_screen.h"
 #include "../assets/gbdk/ceremony_medal_screen.h"
 #include "../assets/gbdk/ceremony_flag_screen.h"
-const ScreenAsset screen_assets[14] = {
+extern const uint8_t story_campus_tiles[3504],story_campus_map[360],story_campus_attributes[360];
+extern const uint16_t story_campus_palettes[32];
+extern const uint8_t story_plaza_tiles[3632],story_plaza_map[360],story_plaza_attributes[360];
+extern const uint16_t story_plaza_palettes[32];
+extern const uint8_t story_mapocho_tiles[3840],story_mapocho_map[360],story_mapocho_attributes[360];
+extern const uint16_t story_mapocho_palettes[32];
+extern const uint8_t story_moneda_tiles[3648],story_moneda_map[360],story_moneda_attributes[360];
+extern const uint16_t story_moneda_palettes[32];
+extern const uint8_t ending_final_tiles[3712],ending_final_map[360],ending_final_attributes[360];
+extern const uint16_t ending_final_palettes[32];
+const ScreenAsset screen_assets[19] = {
  {8,LANGUAGE_SELECT_SCREEN_TILE_COUNT,language_select_screen_tiles,language_select_screen_map,language_select_screen_attributes,language_select_screen_palettes},
  {8,TITLE_SCREEN_TILE_COUNT,title_screen_tiles,title_screen_map,title_screen_attributes,title_screen_palettes},
  {8,CONTROLS_SCREEN_TILE_COUNT,controls_screen_tiles,controls_screen_map,controls_screen_attributes,controls_screen_palettes},
@@ -54,7 +64,12 @@ const ScreenAsset screen_assets[14] = {
  {13,WORLD_MAP_5_SCREEN_TILE_COUNT,world_map_5_screen_tiles,world_map_5_screen_map,world_map_5_screen_attributes,world_map_5_screen_palettes},
  {14,CEREMONY_RESCUE_SCREEN_TILE_COUNT,ceremony_rescue_screen_tiles,ceremony_rescue_screen_map,ceremony_rescue_screen_attributes,ceremony_rescue_screen_palettes},
  {14,CEREMONY_MEDAL_SCREEN_TILE_COUNT,ceremony_medal_screen_tiles,ceremony_medal_screen_map,ceremony_medal_screen_attributes,ceremony_medal_screen_palettes},
- {14,208,runtime_flag_tiles,runtime_flag_map,runtime_flag_attributes,runtime_flag_palettes}
+ {14,208,runtime_flag_tiles,runtime_flag_map,runtime_flag_attributes,runtime_flag_palettes},
+ {9,219,story_campus_tiles,story_campus_map,story_campus_attributes,story_campus_palettes},
+ {10,227,story_plaza_tiles,story_plaza_map,story_plaza_attributes,story_plaza_palettes},
+ {11,240,story_mapocho_tiles,story_mapocho_map,story_mapocho_attributes,story_mapocho_palettes},
+ {12,228,story_moneda_tiles,story_moneda_map,story_moneda_attributes,story_moneda_palettes},
+ {13,232,ending_final_tiles,ending_final_map,ending_final_attributes,ending_final_palettes}
 };
 extern const uint8_t text_0_0[];
 extern const uint8_t text_0_1[];
@@ -99,6 +114,19 @@ extern const uint8_t text_0_39[];
 extern const uint8_t text_0_40[];
 extern const uint8_t text_0_41[];
 extern const uint8_t text_0_42[];
+extern const uint8_t text_0_43[];
+extern const uint8_t text_0_44[];
+extern const uint8_t text_0_45[];
+extern const uint8_t text_0_46[];
+extern const uint8_t text_0_47[];
+extern const uint8_t text_0_48[];
+extern const uint8_t text_0_49[];
+extern const uint8_t text_0_50[];
+extern const uint8_t text_0_51[];
+extern const uint8_t text_0_52[];
+extern const uint8_t text_0_53[];
+extern const uint8_t text_0_54[];
+extern const uint8_t text_0_55[];
 extern const uint8_t text_1_0[];
 extern const uint8_t text_1_1[];
 extern const uint8_t text_1_2[];
@@ -142,7 +170,20 @@ extern const uint8_t text_1_39[];
 extern const uint8_t text_1_40[];
 extern const uint8_t text_1_41[];
 extern const uint8_t text_1_42[];
-const uint8_t * const game_text[2][43] = {
- {text_0_0,text_0_1,text_0_2,text_0_3,text_0_4,text_0_5,text_0_6,text_0_7,text_0_8,text_0_9,text_0_10,text_0_11,text_0_12,text_0_13,text_0_14,text_0_15,text_0_16,text_0_17,text_0_18,text_0_19,text_0_20,text_0_21,text_0_22,text_0_23,text_0_24,text_0_25,text_0_26,text_0_27,text_0_28,text_0_29,text_0_30,text_0_31,text_0_32,text_0_33,text_0_34,text_0_35,text_0_36,text_0_37,text_0_38,text_0_39,text_0_40,text_0_41,text_0_42},
- {text_1_0,text_1_1,text_1_2,text_1_3,text_1_4,text_1_5,text_1_6,text_1_7,text_1_8,text_1_9,text_1_10,text_1_11,text_1_12,text_1_13,text_1_14,text_1_15,text_1_16,text_1_17,text_1_18,text_1_19,text_1_20,text_1_21,text_1_22,text_1_23,text_1_24,text_1_25,text_1_26,text_1_27,text_1_28,text_1_29,text_1_30,text_1_31,text_1_32,text_1_33,text_1_34,text_1_35,text_1_36,text_1_37,text_1_38,text_1_39,text_1_40,text_1_41,text_1_42}
+extern const uint8_t text_1_43[];
+extern const uint8_t text_1_44[];
+extern const uint8_t text_1_45[];
+extern const uint8_t text_1_46[];
+extern const uint8_t text_1_47[];
+extern const uint8_t text_1_48[];
+extern const uint8_t text_1_49[];
+extern const uint8_t text_1_50[];
+extern const uint8_t text_1_51[];
+extern const uint8_t text_1_52[];
+extern const uint8_t text_1_53[];
+extern const uint8_t text_1_54[];
+extern const uint8_t text_1_55[];
+const uint8_t * const game_text[2][56] = {
+ {text_0_0,text_0_1,text_0_2,text_0_3,text_0_4,text_0_5,text_0_6,text_0_7,text_0_8,text_0_9,text_0_10,text_0_11,text_0_12,text_0_13,text_0_14,text_0_15,text_0_16,text_0_17,text_0_18,text_0_19,text_0_20,text_0_21,text_0_22,text_0_23,text_0_24,text_0_25,text_0_26,text_0_27,text_0_28,text_0_29,text_0_30,text_0_31,text_0_32,text_0_33,text_0_34,text_0_35,text_0_36,text_0_37,text_0_38,text_0_39,text_0_40,text_0_41,text_0_42,text_0_43,text_0_44,text_0_45,text_0_46,text_0_47,text_0_48,text_0_49,text_0_50,text_0_51,text_0_52,text_0_53,text_0_54,text_0_55},
+ {text_1_0,text_1_1,text_1_2,text_1_3,text_1_4,text_1_5,text_1_6,text_1_7,text_1_8,text_1_9,text_1_10,text_1_11,text_1_12,text_1_13,text_1_14,text_1_15,text_1_16,text_1_17,text_1_18,text_1_19,text_1_20,text_1_21,text_1_22,text_1_23,text_1_24,text_1_25,text_1_26,text_1_27,text_1_28,text_1_29,text_1_30,text_1_31,text_1_32,text_1_33,text_1_34,text_1_35,text_1_36,text_1_37,text_1_38,text_1_39,text_1_40,text_1_41,text_1_42,text_1_43,text_1_44,text_1_45,text_1_46,text_1_47,text_1_48,text_1_49,text_1_50,text_1_51,text_1_52,text_1_53,text_1_54,text_1_55}
 };

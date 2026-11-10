@@ -82,7 +82,7 @@
     },
     {
       "name": "controls",
-      "tiles": 117,
+      "tiles": 131,
       "max_tiles": 256,
       "palettes": 8,
       "max_palettes": 8,
@@ -190,7 +190,7 @@
         "en",
         "es"
       ],
-      "string_ids": 41,
+      "string_ids": 43,
       "missing_translations": 0,
       "missing_glyphs": 0,
       "pass": true
@@ -266,7 +266,7 @@
     },
     {
       "name": "controls_2bpp_roundtrip",
-      "tiles": 117,
+      "tiles": 131,
       "palettes": 8,
       "mismatched_pixels": 0,
       "pass": true

@@ -49,15 +49,17 @@ uint8_t stomp_bounce;
 uint8_t hud_digits[3],dialog_visible;
 volatile uint8_t parallax_enabled,scroll_far,scroll_city,scroll_foreground;
 static volatile uint8_t pending_far,pending_city,pending_foreground;
-static volatile uint8_t pending_dialog;
-static int16_t previous_player_bottom,last_far_tile,last_city_tile;
-static uint8_t previous_buttons, clock_tick, tap_timer, tap_direction, message_timer, message_id;
+volatile uint8_t pending_dialog;
+int16_t previous_player_bottom;
+static int16_t last_far_tile,last_city_tile;
+uint8_t clock_tick,message_timer,message_id;
+static uint8_t previous_buttons,tap_timer,tap_direction;
 uint8_t oam_next,scanlines[18];
 uint8_t sprite_frames[128];
-static uint8_t sprite_palettes[32], icon_tiles[3];
-static uint8_t column_tiles[18], column_attributes[18], hud_tiles[40], hud_attributes[40];
-static uint8_t hud_dirty, hud_mode, hud_pending, ending_timer, ending_row, barrier_redraw, hazard_tick;
-static uint8_t hud_lives_cache,hud_object_count;
+uint8_t icon_tiles[3],hud_tiles[40],hud_dirty,hud_mode,hud_pending,barrier_redraw,hud_lives_cache,hud_object_count;
+static uint8_t sprite_palettes[32];
+static uint8_t column_tiles[18], column_attributes[18],hud_attributes[40];
+static uint8_t ending_timer,ending_row,hazard_tick;
 static uint8_t coin_cursor, render_coin_cursor;
 static uint8_t streamed;
 static int16_t last_camera_tile, bus_x, previous_bus_x;
@@ -168,22 +170,14 @@ static void move_vertical(void){
  }else if(dest<old && horizontal_edge(x,dest)){player_y=(dest<0?0:(((uint16_t)dest>>3)+1u)*8u)*FP;player_vy=0;return;}
  player_y=target;
 }
-static void sound(uint8_t kind){
- if(kind==1u){
-  // A short, low square voice plus a rough noise burst makes an audible woof.
-  // CH4 is separate from pickup/jump tones, so those cannot silence the bark.
-  NR21_REG=0xac;NR22_REG=0xb1;NR23_REG=0x30;NR24_REG=0xc6;
-  NR41_REG=44;NR42_REG=0xf1;NR43_REG=0x54;NR44_REG=0xc0;return;
- }
- NR21_REG=0x80;NR22_REG=0x92;
- NR23_REG=kind==0?0xb0:kind==2?0xe0:kind==4?0x60:0x00;
- NR24_REG=kind==3?0x84:0x87;
-}
-static void say(uint8_t id){message_id=id;message_timer=100;hud_dirty=1;}
-static void kill_player(void){
+void say(uint8_t id) NONBANKED {message_id=id;message_timer=100;hud_dirty=1;}
+void kill_player(void) NONBANKED {
  if(state!=PLAY || invulnerable)return;
  state=DYING;death_ticks=40;player_vx=0;player_vy=0;dog_frame=10;
  if(lives)--lives;hud_dirty=1;sound(3);
+}
+void finish_boss(void) NONBANKED {
+ barrier_open=1;barrier_redraw=0;say(TXT_STUDENT_FOLLOW);sound(2);
 }
 static uint8_t bark_unblocked(int16_t from,int16_t to,int16_t y){
  int16_t x;if(to>=from){for(x=from;x<=to;x+=4)if(solid_at(x,y))return 0;}
@@ -194,7 +188,8 @@ static void bark(void){
  if(pressed&J_B && !bark_cooldown){
   bark_ticks=8;bark_cooldown=30;sound(1);
   // Each new bark removes exactly one segment, including when airborne.
-  if(!barrier_open && x+16>=BARRIER_X-RESCUE_BARK_RANGE && x<=BARRIER_X+16+RESCUE_BARK_RANGE){
+  if(current_stage>=3u)boss_bark();
+  else if(!barrier_open && x+16>=BARRIER_X-RESCUE_BARK_RANGE && x<=BARRIER_X+16+RESCUE_BARK_RANGE){
    --barrier_strength;barrier_hit_ticks=8;
    if(!barrier_strength){barrier_open=1;barrier_redraw=2;say(TXT_STUDENT_FOLLOW);}
    else say(TXT_BARRIER_HIT);
@@ -219,7 +214,7 @@ static void collect(void){
   }
  }
  if(!(checkpoint_flags&(1u<<current_stage)) && x>=CHECKPOINT_X){checkpoint_flags|=1u<<current_stage;say(TXT_CHECKPOINT);}
- if(x>880 && !barrier_open && !message_timer)say(TXT_RESCUE_PROMPT);
+ if(x>880 && current_stage<3u && !barrier_open && !message_timer)say(TXT_RESCUE_PROMPT);
  if(barrier_open && x+16>=GOAL_X){state=RESCUING;rescue_ticks=110;dog_frame=11;say(TXT_STUDENTS_SAFE);sound(2);}
 }
 static void update_officers(void){
@@ -277,6 +272,7 @@ static void physics(void){
   tap_direction=d;tap_timer=12;
  }
  if(!direction)sprinting=0;
+ if(capture_ticks)direction=0;
  if(direction)facing_left=direction<0;
  player_vx=direction*(sprinting?RUN_SPEED:WALK_SPEED);
  if(grounded)coyote=COYOTE_TICKS;else if(coyote)--coyote;
@@ -291,9 +287,11 @@ static void physics(void){
  if(bark_cooldown)--bark_cooldown;if(bark_ticks)--bark_ticks;
  if(barrier_hit_ticks)--barrier_hit_ticks;
  if(invulnerable)--invulnerable;
+ if(current_stage>=3u)boss_update();if(state!=PLAY)return;
  update_phase=11;bark();update_phase=12;update_officers();if(state!=PLAY)return;
  update_phase=13;update_hazards();if(state!=PLAY)return;update_phase=14;update_rewards();collect();update_phase=15;
- if(bark_ticks)dog_frame=8u+((bark_ticks>>1)&1u);
+ if(capture_ticks)dog_frame=10;
+ else if(bark_ticks)dog_frame=8u+((bark_ticks>>1)&1u);
  else if(!grounded)dog_frame=player_vy<0?6u:7u;
  else if(direction)dog_frame=run_frames[(clock_tick/(sprinting?3u:5u))&7u];
  else dog_frame=(clock_tick>>5)&1u;
@@ -304,7 +302,7 @@ static void column(uint16_t world_column){
   const uint8_t *tiles=stage->visual+1280u+world_column,*attrs=stage->attributes+1280u+world_column;
   for(i=0;i<8u;++i){column_tiles[i]=*tiles;column_attributes[i]=*attrs;if(i<7u){tiles+=128u;attrs+=128u;}}
  }else for(i=0;i<8u;++i){column_tiles[i]=206u+(world_column&1u);column_attributes[i]=6;}
- if(barrier_open && world_column>=118u && world_column<120u){
+ if(current_stage<3u && barrier_open && world_column>=118u && world_column<120u){
   for(i=0;i<4u;++i){column_tiles[i]=stage->library[0];column_attributes[i]=stage->cell_palettes[0];}
  }
  set_bkg_tiles(world_column&31u,10,1,8,column_tiles);
@@ -348,31 +346,6 @@ static void scroll_camera(void){
  if(barrier_redraw && !streamed){erase_barrier_column(120u-barrier_redraw);--barrier_redraw;}
  commit_scroll();
 }
-static void hud(void){
- uint8_t row;uint16_t number;
- if(!hud_dirty && !hud_pending)return;
- if(hud_dirty){hud_dirty=0;
-  // Total is monotonic; the separate modulo-50 counter still awards lives.
-  // At most 105 collectibles exist in this route: bounded subtraction avoids
-  // four expensive 16-bit division calls on a pickup or dialogue frame.
-  number=total_empanadas;hud_digits[0]=hud_digits[1]=0;
-  while(number>=100u){number-=100u;++hud_digits[0];}
-  while(number>=10u){number-=10u;++hud_digits[1];}
-  hud_digits[2]=number;
-  hud_object_count=draw_corner_hud(icon_tiles[0]);hud_lives_cache=lives;
-  if(!message_timer){pending_dialog=0;hud_pending=0;hud_mode=0;return;}
-  if(hud_mode==message_id+1u)return;
-  // Keep counter changes immediate; prepare a new caption after the short
-  // bark animation, when its hit checks and four effect sprites have ended.
-  if(bark_ticks){hud_dirty=1;return;}
-  pending_dialog=0;
-  format_dialog(message_id,hud_tiles);
-  hud_mode=message_id+1u;hud_pending=2;return;
- }
- // Only transient messages use the window, clipped to lines 24..39 by LYC.
- row=2u-hud_pending;set_win_tiles(0,row,20,1,&hud_tiles[row*20u]);--hud_pending;
- if(!hud_pending)pending_dialog=1;
-}
 static void oam_begin(void){uint8_t i;for(i=0;i<18u;++i)scanlines[i]=0;oam_next=hud_object_count;scanlines[0]=scanlines[1]=max_scanline_objects=hud_object_count;}
 uint8_t object(int16_t x,int16_t y,uint8_t tile,uint8_t properties) NONBANKED {
  uint8_t top,bottom;OAM_item_t *item;
@@ -405,13 +378,14 @@ static void render(void){
  // Cached corner objects occupy only their active slots.
  oam_begin();
  if(state!=PLAY || !invulnerable || (clock_tick&4u))pose(x,y,dog_frame,facing_left);
- if(!barrier_open)render_gate(BARRIER_X-camera_x,barrier_strength,barrier_hit_ticks);
+ if(current_stage>=3u)boss_render();
+ else if(!barrier_open)render_gate(BARRIER_X-camera_x,barrier_strength,barrier_hit_ticks);
  if(state==RESCUING){
   int16_t run=110u-rescue_ticks;
   run_student(GOAL_X+run-camera_x,0,(clock_tick>>3)&1u);run_student(GOAL_X+20+run-camera_x,1,(clock_tick>>3)&1u);
  }else{
   for(i=0;i<ENEMY_COUNT;++i){Officer *o=&officers[i];if(officer_health[i] && o->x+16>camera_x && o->x<camera_x+160){pose(o->x-camera_x,o->y,o->stunned?18u:o->type?19u:16u+((clock_tick>>3)&1u),o->left);if(o->stunned || officer_health[i]==1u)object(o->x+4-camera_x,o->y-8,icon_tiles[2],officer_health[i]==1u?4u:5u);}}
-  pose(GOAL_X-camera_x,96,20u+((clock_tick>>4)&1u),0);pose(GOAL_X+20-camera_x,96,22u+((clock_tick>>4)&1u),0);
+  if(current_stage<3u || !boss_health){pose(GOAL_X-camera_x,96,20u+((clock_tick>>4)&1u),0);pose(GOAL_X+20-camera_x,96,22u+((clock_tick>>4)&1u),0);}
  }
  if(bark_ticks)pose(x+(facing_left?-16:16),y,28u+((bark_ticks>>1)&1u),facing_left);
  pose(CHECKPOINT_X-camera_x,96,26,0);
@@ -440,7 +414,7 @@ static void load_stage(uint8_t restart){
  VBK_REG=1;set_bkg_data(0,stage->depth_count,stage->depth_tiles);VBK_REG=0;
  set_bkg_palette(0,8,stage->palettes);
  set_bkg_palette(7,1,dialog_palette);
- if(restart)spawn();fill_camera();SCY_REG=0;SCX_REG=pending_far;
+ if(restart)spawn();boss_load(restart);fill_camera();SCY_REG=0;SCX_REG=pending_far;
  for(i=0;i<40u;++i)hide_sprite(i);
  move_win(7,24);hud_dirty=1;hud_mode=255;hud_pending=0;
  for(i=0;i<40u;++i)hud_attributes[i]=7u;
@@ -449,7 +423,7 @@ static void load_stage(uint8_t restart){
  HIDE_WIN;SHOW_BKG;SHOW_SPRITES;DISPLAY_ON;state=PLAY;
 }
 static void new_game(void){
- uint8_t i;unlocked=1;selected=0;completed=checkpoint_flags=empanadas=0;total_empanadas=0;lives=3;
+ uint8_t i;unlocked=1;selected=0;completed=checkpoint_flags=empanadas=boss_defeated=0;total_empanadas=0;lives=3;
  for(i=0;i<5u;++i){coin_flags[i]=0;defeated_flags[i]=reward_collected_flags[i]=0;}state=CONTROLS;ui_show(state);
 }
 static void transition(uint8_t action){

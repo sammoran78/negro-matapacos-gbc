@@ -1,0 +1,21 @@
+{
+  "name": "ending_final",
+  "text_id": "ending_final",
+  "caption_id": "ending_complete",
+  "tiles": 232,
+  "bank": 13,
+  "source": "source/story-medal.png",
+  "illustration": {
+    "x": 0,
+    "y": 8,
+    "width": 160,
+    "height": 96
+  },
+  "bubble": {
+    "x": 8,
+    "y": 104,
+    "columns": 18,
+    "rows": 3
+  },
+  "appears_after": "presidential_flag_raising"
+}

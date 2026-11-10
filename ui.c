@@ -2,9 +2,10 @@
 #pragma bank 1
 #include "game.h"
 #include <gbdk/metasprites.h>
-static const uint8_t node_x[5] = {44,24,124,104,72};
-static const uint8_t node_y[5] = {112,76,84,48,80};
+static const uint8_t node_x[5] = {24,44,124,104,72};
+static const uint8_t node_y[5] = {76,112,84,48,80};
 static const uint8_t stage_text[5] = {TXT_STAGE_ALAMEDA,TXT_STAGE_CAMPUS,TXT_STAGE_PLAZA,TXT_STAGE_MAPOCHO,TXT_STAGE_MONEDA};
+static const uint8_t story_text[4] = {TXT_STORY_CAMPUS,TXT_STORY_PLAZA,TXT_STORY_MAPOCHO,TXT_STORY_MONEDA};
 static uint8_t line_tiles[20], line_attrs[20];
 static void ui_line(uint8_t row, const uint8_t *text) {
  uint8_t i, n=0, start;
@@ -26,6 +27,26 @@ static void paragraph(uint8_t row,uint8_t id){
  }
 }
 static void blank(uint8_t from,uint8_t to){uint8_t y;for(y=from;y<=to;++y)ui_line(y,(const uint8_t *)"");}
+/* Small sound routines are banked to preserve fixed-ROM space for physics. */
+void sound(uint8_t kind) BANKED {
+ if(kind==1u){
+  NR21_REG=0xac;NR22_REG=0xb1;NR23_REG=0x30;NR24_REG=0xc6;
+  NR41_REG=44;NR42_REG=0xf1;NR43_REG=0x54;NR44_REG=0xc0;return;
+ }
+ NR21_REG=0x80;NR22_REG=0x92;
+ NR23_REG=kind==0?0xb0:kind==2?0xe0:kind==4?0x60:0x00;
+ NR24_REG=kind==3?0x84:0x87;
+}
+static void story_bubble(uint8_t id){
+ uint8_t row,pos=0,n,split,i;fetch_text(id);
+ for(row=13;row<16u;++row){
+  n=0;while(n<18u && text_buffer[pos+n])++n;
+  if(text_buffer[pos+n]){split=n;while(split && text_buffer[pos+split]!=' ')--split;if(split)n=split;}
+  for(i=0;i<18u;++i){line_tiles[i]=i<n?font_lut[text_buffer[pos+i]]:128u;line_attrs[i]=7u;}
+  set_bkg_tiles(1,row,18,1,line_tiles);set_bkg_attributes(1,row,18,1,line_attrs);
+  pos+=n;if(text_buffer[pos]==' ')++pos;
+ }
+}
 /* Prepare a centered two-line window popup without touching scrolling BG RAM. */
 void format_dialog(uint8_t id,uint8_t *tiles) BANKED {
  uint8_t i,row,pos=0,n,split,start;fetch_text(id);
@@ -36,6 +57,24 @@ void format_dialog(uint8_t id,uint8_t *tiles) BANKED {
   start=(20u-n)>>1;for(i=0;i<n;++i)tiles[row*20u+start+i]=font_lut[text_buffer[pos+i]];
   pos+=n;if(text_buffer[pos]==' ')++pos;
  }
+}
+void hud(void) BANKED {
+ uint8_t row;uint16_t number;
+ if(!hud_dirty && !hud_pending)return;
+ if(hud_dirty){hud_dirty=0;
+  number=total_empanadas;hud_digits[0]=hud_digits[1]=0;
+  while(number>=100u){number-=100u;++hud_digits[0];}
+  while(number>=10u){number-=10u;++hud_digits[1];}
+  hud_digits[2]=number;
+  hud_object_count=draw_corner_hud(icon_tiles[0]);hud_lives_cache=lives;
+  if(!message_timer){pending_dialog=0;hud_pending=0;hud_mode=0;return;}
+  if(hud_mode==message_id+1u)return;
+  if(bark_ticks){hud_dirty=1;return;}
+  pending_dialog=0;format_dialog(message_id,hud_tiles);
+  hud_mode=message_id+1u;hud_pending=2;return;
+ }
+ row=2u-hud_pending;set_win_tiles(0,row,20,1,&hud_tiles[row*20u]);--hud_pending;
+ if(!hud_pending)pending_dialog=1;
 }
 /* Pack active HUD slots first, leaving the full remainder for world actors. */
 uint8_t draw_corner_hud(uint8_t empanada_tile) BANKED {
@@ -82,6 +121,7 @@ void reset_officers(void) BANKED {
   officer_health[i]=defeated_flags[current_stage]&(1u<<i)?0u:2u;officer_hit_ticks[i]=0;
   reward_active[i]=!officer_health[i] && !(reward_collected_flags[current_stage]&(1u<<i));
   reward_x[i]=o->home+4;reward_y[i]=104*16;reward_vy[i]=reward_delay[i]=0;
+  if(current_stage>=3u && i==4u)officer_health[i]=reward_active[i]=0;
  }
 }
 void run_student(int16_t x,uint8_t color,uint8_t frame) BANKED {
@@ -113,7 +153,7 @@ void ui_show(uint8_t new_state) BANKED {
  case CONTROLS:
   screen_load(SCREEN_CONTROLS);blank(0,17);line_id(1,TXT_CONTROLS_TITLE);
   line_id(4,TXT_CONTROLS_MOVE);line_id(6,TXT_CONTROLS_JUMP);line_id(8,TXT_CONTROLS_BARK);
-  line_id(10,TXT_CONTROLS_RUN);line_id(12,TXT_CONTROLS_PAUSE);line_id(14,TXT_CONTROLS_STOMP);line_id(16,TXT_CONTINUE);break;
+  line_id(10,TXT_CONTROLS_RUN);line_id(12,TXT_CONTROLS_PAUSE);line_id(14,TXT_CONTROLS_STOMP);line_id(15,TXT_CONTROLS_BOSSES);line_id(16,TXT_CONTINUE);break;
  case WORLD:screen_load(SCREEN_WORLD+unlocked-1u);world_labels();break;
  case PAUSED:
   screen_load(SCREEN_PAUSE);blank(0,4);blank(5,10);blank(15,17);
@@ -125,15 +165,16 @@ void ui_show(uint8_t new_state) BANKED {
   ui_line(16,(const uint8_t *)(language?"A - REINTENTAR":"A - RETRY"));
   ui_line(17,(const uint8_t *)(language?"B - INICIO":"B - TITLE"));break;
  case CLEAR:
-  screen_load(SCREEN_CLEAR);blank(0,4);blank(12,17);
-  line_id(1,TXT_STUDENTS_SAFE);paragraph(12,TXT_LEVEL_UNLOCKED);line_id(16,TXT_CONTINUE);break;
+  screen_load(SCREEN_STORY+current_stage);line_id(0,stage_text[selected]);
+  story_bubble(story_text[current_stage]);line_id(17,TXT_CONTINUE);break;
  case ENDING:
   screen_load(ending_beat==0?SCREEN_RESCUE:ending_beat==1?SCREEN_MEDAL:SCREEN_FLAG);
   blank(0,1);blank(16,17);
   paragraph(0,ending_beat==0?TXT_ENDING_RESCUE:ending_beat==1?TXT_ENDING_MEDAL:TXT_ENDING_FLAG);
   paragraph(16,ending_beat==1?TXT_PRESIDENT_THANKS:TXT_STUDENT_THANKS);break;
  case FINISHED:
-  blank(16,17);line_id(16,TXT_ENDING_COMPLETE);line_id(17,TXT_CONTINUE);break;
+  screen_load(SCREEN_FINAL);line_id(0,TXT_ENDING_COMPLETE);
+  story_bubble(TXT_ENDING_FINAL);line_id(17,TXT_CONTINUE);break;
  }
 }
 uint8_t ui_update(void) BANKED {

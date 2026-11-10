@@ -47,6 +47,19 @@
     "student_follow": { "en": "THIS WAY!", "es": "¡POR AQUÍ!" },
     "student_thanks": { "en": "THANK YOU, MATAPACOS!", "es": "¡GRACIAS, MATAPACOS!" },
     "hazard_warning": { "en": "LOOK OUT!", "es": "¡CUIDADO!" },
-    "barrier_hit": { "en": "BARK AGAIN!", "es": "¡LADRA OTRA VEZ!" }
+    "barrier_hit": { "en": "BARK AGAIN!", "es": "¡LADRA OTRA VEZ!" },
+    "controls_bosses": { "en": "BOSSES: BARK TO WIN", "es": "JEFES: GANA LADRANDO" },
+    "boss_net": { "en": "NET BOSS: 5 BARKS", "es": "JEFE RED: 5 LADRIDOS" },
+    "boss_tank": { "en": "CANNON: 10 BARKS", "es": "CAÑÓN: 10 LADRIDOS" },
+    "boss_net_warn": { "en": "NET INCOMING!", "es": "¡VIENE LA RED!" },
+    "boss_tank_warn": { "en": "CANNON AIMING!", "es": "¡CAÑÓN APUNTANDO!" },
+    "boss_dodge": { "en": "DODGE!", "es": "¡ESQUIVA!" },
+    "boss_open": { "en": "CLOSE IN AND BARK!", "es": "¡ACÉRCATE Y LADRA!" },
+    "boss_hurt": { "en": "HURT! NEXT HIT COSTS A LIFE", "es": "¡HERIDO! OTRO GOLPE CUESTA UNA VIDA" },
+    "story_campus": { "en": "OUR FRIENDS NEED HELP AT THE CAMPUS!", "es": "¡AL CAMPUS! TUS AMIGOS TE NECESITAN." },
+    "story_plaza": { "en": "TO DIGNITY SQUARE! NO ONE GETS LEFT BEHIND.", "es": "¡A PLAZA DIGNIDAD! NADIE QUEDARÁ ATRÁS." },
+    "story_mapocho": { "en": "FOLLOW THE RIVER! A NET BLOCKS OUR WAY.", "es": "¡SIGUE EL RÍO! UNA RED BLOQUEA EL PASO." },
+    "story_moneda": { "en": "DODGE THE CANNON! BRING OUR FRIENDS HOME!", "es": "¡ESQUIVA EL CAÑÓN! LLEVEMOS A TODOS A CASA." },
+    "ending_final": { "en": "YOU KEPT THEM SAFE. THANK YOU, MATAPACOS!", "es": "LOS HAS PROTEGIDO. ¡GRACIAS, MATAPACOS!" }
   }
 }
